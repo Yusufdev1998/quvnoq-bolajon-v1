@@ -4,8 +4,8 @@ export function Bunny({ pose = 'reach', animated = false }: { pose?: string; ani
     <g className="bunny-body">
       <path d="M104 201L87 240Q85 253 103 252L122 218M145 202L165 237Q175 251 156 254L132 219" fill="#FFF8E9" stroke="#EAD8B9" strokeWidth="2" />
       <path d="M103 180L96 210Q108 223 127 216L131 199L139 217Q157 220 165 208L154 180" fill="#E9A85E" />
-      <path className="arm arm-left" d={pose === 'stretch' ? 'M105 147Q66 153 42 141Q30 143 37 155Q67 180 106 173' : pose === 'hands' || pose === 'ball' ? 'M104 147Q70 176 113 189L124 174L100 164' : 'M105 150Q69 140 62 112Q60 98 50 105Q42 112 49 129Q63 166 106 177'} fill="#FFF8E9" stroke="#EAD8B9" strokeWidth="2" />
-      <path className="arm arm-right" d={pose === 'stretch' ? 'M154 146Q191 153 217 140Q228 143 222 154Q194 180 153 173' : pose === 'hands' || pose === 'ball' ? 'M153 147Q187 176 144 189L132 174L157 164' : 'M154 151Q190 143 199 112Q201 100 211 106Q220 115 212 132Q197 169 154 176'} fill="#FFF8E9" stroke="#EAD8B9" strokeWidth="2" />
+      <path className="arm arm-left" d={pose === 'still' || pose === 'wings' || pose === 'balance' ? 'M105 147Q66 153 42 141Q30 143 37 155Q67 180 106 173' : pose === 'hands' || pose === 'ball' ? 'M104 147Q70 176 113 189L124 174L100 164' : 'M105 150Q69 140 62 112Q60 98 50 105Q42 112 49 129Q63 166 106 177'} fill="#FFF8E9" stroke="#EAD8B9" strokeWidth="2" />
+      <path className="arm arm-right" d={pose === 'still' || pose === 'wings' || pose === 'balance' ? 'M154 146Q191 153 217 140Q228 143 222 154Q194 180 153 173' : pose === 'hands' || pose === 'ball' ? 'M153 147Q187 176 144 189L132 174L157 164' : 'M154 151Q190 143 199 112Q201 100 211 106Q220 115 212 132Q197 169 154 176'} fill="#FFF8E9" stroke="#EAD8B9" strokeWidth="2" />
       <path d="M104 140Q128 128 153 141L163 185Q131 202 96 185Z" fill="#65A68E" />
       <path d="M113 139L122 157L133 147L144 156L149 140" fill="#C6E1CF" />
       <path d="M108 62Q75 2 93 1Q109-2 122 56M141 57Q153-5 169 4Q186 11 159 71" fill="#FFF8E9" stroke="#EAD8B9" strokeWidth="2" />

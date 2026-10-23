@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { gymDays, games } from '../src/data.ts';
-import { completedDays, csvCell, dateKey, initialProgress, isDayUnlocked, nextDay, normalizeProgress, recordSession, uzDate, uzWeekday } from '../src/progress.ts';
+import { addAssessment, addChild, addSession, childView, completedDays, csvCell, dateKey, initialProgress, isDayUnlocked, nextDay, normalizeProgress, recordSession, removeChild, reportCsv, uzDate, uzWeekday } from '../src/progress.ts';
 
 test('gymnastics days unlock sequentially and cannot be skipped', () => {
   assert.equal(nextDay([]), 1);
@@ -45,8 +45,37 @@ test('progress validation rejects corrupt saved data', () => {
   const valid = recordSession([], gymDays[0], 12, 'happy')[0];
   const loaded = normalizeProgress({ version: 1, profile: { name: '', age: 100 }, sessions: [valid, { ...valid, seconds: -1 }, { ...valid, at: 'bad date' }, null] });
   assert.equal(loaded.sessions.length, 1);
-  assert.equal(loaded.profile.name, 'Bolajon');
-  assert.equal(loaded.profile.age, 5);
+  assert.equal(loaded.children[0].name, 'Bolajon');
+  assert.equal(loaded.children[0].age, 5);
+});
+
+test('saved version 1 data becomes the first child of version 2', () => {
+  const old = { version: 1, profile: { name: 'Aziza', age: 4, role: 'teacher' }, reducedMotion: true, sessions: [{ id: 'a', activityId: 'gym-1', title: 'x', kind: 'gym', day: 1, seconds: 30, mood: 'happy', at: '2026-10-01T10:00:00Z' }] };
+  const p = normalizeProgress(old);
+  assert.equal(p.version, 2);
+  assert.equal(p.role, 'teacher');
+  assert.equal(p.reducedMotion, true);
+  assert.deepEqual(p.children, [{ id: 'child-1', name: 'Aziza', age: 4 }]);
+  assert.equal(p.sessions[0].childId, 'child-1');
+  assert.deepEqual(normalizeProgress(JSON.parse(JSON.stringify(p))), p);
+});
+
+test('each child keeps separate gymnastics progress and results', () => {
+  let p = addSession(initialProgress, gymDays[0], 40, 'happy');
+  p = addChild(p, 'Ali', 6);
+  assert.equal(childView(p).profile.name, 'Ali');
+  assert.equal(childView(p).sessions.length, 0);
+  assert.equal(addSession(p, gymDays[1], 40, 'happy'), p);
+  p = addAssessment(p, 'longJump', 92);
+  p = addAssessment(p, 'longJump', 999);
+  assert.equal(p.assessments.length, 1);
+  const first = p.children[0].id;
+  assert.equal(nextDay(childView({ ...p, activeChildId: first }).sessions), 2);
+  const removed = removeChild(p, p.activeChildId);
+  assert.equal(removed.children.length, 1);
+  assert.equal(removed.assessments.length, 0);
+  assert.equal(removed.sessions.length, 1);
+  assert.equal(removeChild(removed, first), removed);
 });
 
 test('local dates use Tashkent time across UTC midnight', () => {
@@ -64,4 +93,14 @@ test('CSV export escapes quotes and neutralizes formula-like profile names', () 
   assert.equal(csvCell('=1+1'), '"\'=1+1"');
   assert.equal(csvCell('  @SUM(1)'), '"\'  @SUM(1)"');
   assert.equal(csvCell(30), '"30"');
+});
+
+test('the CSV report lists every child’s sessions and test results', () => {
+  let p = addSession(initialProgress, gymDays[0], 40, 'happy', '2026-10-20T08:00:00Z');
+  p = addChild(p, 'Ali', 6);
+  p = addAssessment(p, 'run10', 4.2, '2026-10-21T08:00:00Z');
+  const lines = reportCsv(p).split('\r\n');
+  assert.equal(lines.length, 3);
+  assert.ok(lines[1].includes('"Ali"') && lines[1].includes('"Jismoniy test"') && lines[1].includes('"4.2"'));
+  assert.ok(lines[2].includes('"Bolajon"') && lines[2].includes('"Gimnastika"'));
 });

@@ -6,7 +6,7 @@ import { games } from '../src/data.ts';
 
 test('the garden story uses its eight authored Rive movements and includes a silent rest', () => {
   const rabbit = games.find(a => a.id === 'rabbit')!;
-  assert.deepEqual(rabbit.steps.map(s => bunnyAction(s.pose)), [3, 2, 1, 0, 4, 1, 5, 6]);
+  assert.deepEqual(rabbit.steps.map(s => bunnyAction(s.pose)), [3, 2, 1, 0, 7, 1, 5, 6]);
   assert.equal(rabbit.steps.reduce((total, step) => total + (step.seconds ?? 0), 0), 90);
   assert.equal(rabbit.steps.filter(step => step.challenge).length, 1);
   assert.equal(rabbit.steps.find(step => step.cue === 'To‘xta')?.seconds, 6);

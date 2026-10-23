@@ -108,3 +108,66 @@
 .topbar .visual-badge{white-space:nowrap}
 @media(max-width:1250px){.topbar .visual-badge{display:none}}
 @media(max-width:540px){.music-trigger{width:40px;padding:8px;min-width:40px;min-height:40px}.music-trigger>span:not(.music-indicator){display:none}.music-panel{right:-82px;width:min(285px,calc(100vw - 48px));padding:16px}.modal-header-controls{gap:5px}.modal-header-controls .music-panel{right:-44px;width:min(285px,calc(100vw - 60px))}.modal-top>.modal-header-controls .music-trigger{min-height:40px;min-width:40px;height:40px}.music-panel-heading h2{font-size:13px}.music-panel-heading p{font-size:9px}}
+
+/* Colored command cards (green move, red stop, yellow get ready, blue stretch/rest). */
+.command-card{--card:#3f8f55;--card-ink:#fff;z-index:6;display:flex;align-items:center;font-weight:900;color:var(--card-ink);background:var(--card)}
+.command-card.stop{--card:#cf4436}.command-card.ready{--card:#f0c23f;--card-ink:#3d3418}.command-card.rest{--card:#3f7fc0}
+.command-card.raised{position:absolute;left:50%;top:50%;width:min(62%,250px);aspect-ratio:1.25;flex-direction:column;justify-content:center;gap:6px;border-radius:18px;border:5px solid #fffefa;box-shadow:0 14px 34px #1f2c2440;text-align:center;transform:translate(-50%,-50%) rotate(-4deg);animation:card-raise 1.8s ease both;pointer-events:none}
+.command-card.raised strong{font-size:27px;line-height:1}.command-card.raised span{font-size:13px;opacity:.92}
+.command-card.corner{position:absolute;right:12px;bottom:12px;gap:6px;padding:9px 12px;border-radius:10px;font-size:12px;border:2px solid #fffefa;box-shadow:0 4px 10px #2d3a2f26}
+@keyframes card-raise{0%{opacity:0;transform:translate(-50%,-30%) rotate(-12deg) scale(.7)}14%{opacity:1;transform:translate(-50%,-50%) rotate(-4deg) scale(1.04)}22%,80%{opacity:1;transform:translate(-50%,-50%) rotate(-4deg) scale(1)}100%{opacity:0;transform:translate(10%,30%) rotate(0) scale(.35)}}
+@media(max-width:540px){.command-card.raised strong{font-size:22px}.command-card.corner{font-size:10px;padding:7px 9px;right:10px;bottom:10px}.command-card.corner svg{width:15px;height:15px}}
+
+/* Children, recommendations and measured physical tests. */
+.child-switcher{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:18px 0 4px}
+.child-switcher button{display:flex;align-items:center;gap:8px;flex:none;min-height:44px;padding:6px 13px 6px 6px;border:1px solid var(--line);border-radius:12px;background:#fffefa;color:#5f6c55;font-size:12px;font-weight:800}
+.child-switcher button small{color:#7d8873;font-weight:600;font-size:10px}
+.child-switcher button.selected{border-color:#c98a5c;background:#fbeee3;color:#8d4d27}
+.child-switcher .avatar{height:30px;width:30px}
+.profile-form .child-switcher{margin:16px 0 14px}
+.profile-form>label+label,.profile-form>label+.child-switcher+label{margin-top:14px}
+.child-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:14px}
+.child-actions .outline-button{margin:0}
+.text-button.danger{color:#a5452f}
+.remove-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:11px;color:#8a3e2b;font-weight:700}
+.advice-card{margin-top:22px;border:1px solid #e9dfc8;border-radius:17px;background:#fffaf0;padding:20px}
+.advice-list{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.advice{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:#fffefa;border:1px solid var(--line)}
+.advice strong{font-size:13px}.advice p{font-size:11px;color:#626d58;margin-top:3px;line-height:1.55}
+.advice .text-button{margin-top:4px;padding:6px 0;min-height:32px;color:#8d5a2f}
+.advice-icon{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:#e6efe5;color:#4f7157}
+.advice.praise .advice-icon{background:#f8f0d9;color:#80672c}.advice.care .advice-icon{background:#f9e3dc;color:#9b4a32}.advice.remind .advice-icon{background:#ece9f5;color:#6a5a88}
+.tests-section .section-heading .outline-button{flex:none}
+.tests-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.test-card{display:grid;gap:5px;align-content:start;text-align:left;padding:15px;border:1px solid var(--line);border-radius:15px;background:#fffefa;color:var(--ink)}
+.test-card:hover{border-color:#d9cdb3}
+.test-card>small{font-size:9px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#6d7963}
+.test-card>strong{font-size:13px;line-height:1.3}
+.test-value{font-size:24px;font-weight:900;margin-top:4px}.test-value small{font-size:11px;color:#6d7963;font-weight:700}
+.sparkline{display:block;width:100%;height:28px;color:#6f9a7a}.sparkline.empty{height:6px}
+.trend{font-size:10px;font-weight:800;color:#6d7963}.trend.improved{color:#3f7d4c}.trend.declined{color:#a5452f}
+.test-empty{display:flex;align-items:center;gap:5px;margin-top:auto;font-size:11px;font-weight:700;color:#8d703c}
+.group-card{margin-top:4px}
+.group-table{border:1px solid var(--line);border-radius:15px;background:#fffefa;overflow:hidden}
+.group-row{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr));gap:8px;align-items:center;width:100%;padding:12px 15px;text-align:left;background:none;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink)}
+.group-row:last-child{border-bottom:0}.group-row.head{font-size:10px;font-weight:800;color:#6d7963;background:#f7f6ef}
+.group-row span:first-child{display:grid}.group-row small{font-size:10px;color:#6d7963}
+.group-row.selected{background:#fbeee3}
+.measure-how{display:flex;gap:9px;margin-top:14px;padding:12px;border-radius:12px;background:#f3f5ec;color:#55654a;font-size:11px;line-height:1.55}
+.measure-how svg{flex:none;margin-top:2px}
+.assessment-form>label{margin-top:16px}
+.assessment-form input{width:100%}
+.form-error{margin-top:10px;font-size:11px;color:#a5452f;font-weight:700}
+@media(max-width:760px){.tests-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.tests-section .section-heading{flex-wrap:wrap}.test-card{padding:13px}.test-value{font-size:21px}.group-row{padding:11px 12px;font-size:11px}.advice-card{padding:16px}}
+.assessment-form .primary-button,.assessment-form .form-error+.primary-button{margin-top:22px}
+.tests-section+.monitor-filters,.group-card+.monitor-filters{margin-top:30px}
+
+/* Android draws edge-to-edge: keep content clear of the status and navigation bars.
+   Capacitor injects --safe-area-inset-* where the WebView lacks env() support. */
+:root{--sat:max(env(safe-area-inset-top,0px),var(--safe-area-inset-top,0px));--sab:max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px))}
+.topbar{padding-top:var(--sat);height:calc(87px + var(--sat))}
+@media(max-width:540px){.topbar{height:calc(70px + var(--sat))}}
+.bottom-nav{padding-bottom:max(10px,var(--sab))}
+.modal{max-height:calc(100dvh - 48px - var(--sat) - var(--sab))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:var(--sat);background:#fffefa;z-index:60;pointer-events:none}

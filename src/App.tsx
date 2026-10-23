@@ -1,16 +1,21 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
-import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Clock3, Flower2, Footprints, Gamepad2, Hand, Heart, House, Info, Leaf, LockKeyhole, Pause, Play, Plus, RotateCcw, ShieldCheck, Sparkles, Sprout, Star, Sun, TrendingUp, Trophy, Users, VolumeX, X } from 'lucide-react';
+import { ArrowDownToLine, ArrowLeft, ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Clock3, Flower2, Footprints, Gamepad2, Hand, Heart, House, Info, Leaf, Lightbulb, LockKeyhole, Pause, Play, Plus, RotateCcw, ShieldCheck, Sparkles, Sprout, Star, Sun, TrendingUp, Trophy, Users, VolumeX, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ActivityArt, Bunny, HeroArt } from './Illustrations';
 import { games, gymDays, kindLabels, motorActivities, sectionLabels } from './data';
 import type { Activity, Mood, Section } from './data';
-import { STORAGE_KEY, completedDays, dateKey, downloadReport, formatDuration, initialProgress, isDayUnlocked, nextDay, normalizeProgress, recordSession, uzDate, uzWeekday, localTime } from './progress';
-import type { Profile, Progress, Session } from './progress';
+import { STORAGE_KEY, activeChild, addAssessment, addChild, addSession, childView, completedDays, dateKey, formatDuration, initialProgress, isDayUnlocked, nextDay, normalizeProgress, removeChild, uzDate, uzWeekday, localTime } from './progress';
+import type { ChildView, Progress, Role, Session } from './progress';
+import { physicalTests, testById, testHistory, trend } from './assessments';
+import type { TestId } from './assessments';
+import { recommendations } from './recommendations';
+import { exportReport } from './report';
 import { MusicControl, useMusic } from './Music';
 import { animationIsRunning } from './animationPlayback';
 import { useReducedMotion } from './useReducedMotion';
 import { GardenScenery, SceneProgress, StarChallenge } from './GardenAdventure';
+import { CommandCard } from './CommandCard';
 import { advanceSceneClock, canAdvanceStory } from './adventure';
 
 const Bunny3D = lazy(() => import('./Bunny3D'));
@@ -40,7 +45,9 @@ function currentSection(): Section {
 
 export default function App() {
   const [loaded] = useState(load);
-  const [progress, setProgress] = useState<Progress>(loaded.progress);
+  const [store, setStore] = useState<Progress>(loaded.progress);
+  // Every screen shows the active child; the full store keeps all children.
+  const progress = childView(store);
   const [storageWarning, setStorageWarning] = useState(loaded.warning);
   const [section, setSection] = useState<Section>(currentSection);
   const [overlay, setOverlay] = useState<'profile' | 'help' | null>(null);
@@ -48,9 +55,9 @@ export default function App() {
   const [toast, setToast] = useState('');
   const mainRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); }
     catch { setStorageWarning(true); }
-  }, [progress]);
+  }, [store]);
   useEffect(() => {
     const onHash = () => { setSection(currentSection()); window.scrollTo({ top: 0 }); mainRef.current?.focus({ preventScroll: true }); };
     window.addEventListener('hashchange', onHash);
@@ -107,13 +114,13 @@ export default function App() {
         {section === 'gym' && <Gym progress={progress} start={start} />}
         {section === 'games' && <ActivityLibrary kind="games" start={start} sessions={progress.sessions} />}
         {section === 'motor' && <ActivityLibrary kind="motor" start={start} sessions={progress.sessions} />}
-        {section === 'monitor' && <Monitoring progress={progress} navigate={navigate} notify={notify} />}
+        {section === 'monitor' && <Monitoring progress={progress} store={store} update={setStore} navigate={navigate} notify={notify} start={id => { const a = [...games, ...motorActivities].find(x => x.id === id); if (a) start(a); }} />}
       </main>
     </div>
     <nav className="bottom-nav" aria-label="Mobil navigatsiya">{navItems.map(({ id, icon: Icon, short }) => <a key={id} href={`#${id}`} className={section === id ? 'active' : ''} aria-current={section === id ? 'page' : undefined}><Icon size={22} strokeWidth={section === id ? 2.3 : 1.8} /><span>{short}</span></a>)}</nav>
-    {overlay === 'profile' && <ProfileModal progress={progress} close={() => setOverlay(null)} save={(profile, reducedMotion) => { setProgress(p => ({ ...p, profile, reducedMotion })); setOverlay(null); notify('Profil saqlandi. Yangi yutuqlar sari!'); }} />}
+    {overlay === 'profile' && <ProfileModal store={store} close={() => setOverlay(null)} save={next => { setStore(next); setOverlay(null); notify('Profil saqlandi. Yangi yutuqlar sari!'); }} />}
     {overlay === 'help' && <HelpModal close={() => setOverlay(null)} />}
-    {activity && <ActivityPlayer key={activity.id} activity={activity} reducedMotion={progress.reducedMotion} close={() => setActivity(null)} save={(seconds, mood) => { setProgress(p => ({ ...p, sessions: recordSession(p.sessions, activity, seconds, mood) })); }} />}
+    {activity && <ActivityPlayer key={activity.id} activity={activity} reducedMotion={progress.reducedMotion} close={() => setActivity(null)} save={(seconds, mood) => { setStore(p => addSession(p, activity, seconds, mood)); }} />}
     {toast && <div className="toast" role="status"><Check size={18} />{toast}</div>}
   </div>;
 }
@@ -134,11 +141,11 @@ function PageHeading({ eyebrow, title, description, children }: { eyebrow: strin
   return <div className="page-heading"><div><div className="eyebrow"><Sparkles size={15} />{eyebrow}</div><h1>{title}</h1><p>{description}</p></div>{children}</div>;
 }
 
-function Gym({ progress, start }: { progress: Progress; start: (activity: Activity) => void }) {
+function Gym({ progress, start }: { progress: ChildView; start: (activity: Activity) => void }) {
   const [week, setWeek] = useState(Math.floor((nextDay(progress.sessions) - 1) / 7));
   const done = completedDays(progress.sessions); const day = nextDay(progress.sessions); const current = gymDays[day - 1];
   return <div className="inner-page"><PageHeading eyebrow="HAR KUN BIR QADAM" title="Quvnoq gimnastika" description="Ko‘ramiz, takrorlaymiz va birga ulg‘ayamiz." />
-    <section className="gym-banner"><div><span className="soft-chip">30 kunlik sayohat</span><h2>{done.length === 30 ? 'Sayohat yakunlandi!' : `${day}-kun. ${current.title}`}</h2><p>Tanani qizdirish → asosiy harakat → dam olish</p><button className="primary-button" onClick={() => start(current)}><Play size={16} fill="currentColor" />{done.length === 30 ? 'Yana takrorlaymiz' : 'Bugungi mashg‘ulot'}<ArrowRight size={17} /></button><small>Namuna dastur · Kattalar bilan birga</small></div><div className="gym-bunny"><Bunny /></div></section>
+    <section className="gym-banner"><div><span className="soft-chip">30 kunlik sayohat</span><h2>{done.length === 30 ? 'Sayohat yakunlandi!' : `${day}-kun. ${current.title}`}</h2><p>Tanani qizdirish → asosiy harakat → cho‘zilish</p><button className="primary-button" onClick={() => start(current)}><Play size={16} fill="currentColor" />{done.length === 30 ? 'Yana takrorlaymiz' : 'Bugungi mashg‘ulot'}<ArrowRight size={17} /></button><small>Namuna dastur · Kattalar bilan birga</small></div><div className="gym-bunny"><Bunny /></div></section>
     <div className="program-heading"><div><h2>Harakatlar taqvimi</h2><p>Keyingi kun avvalgisi bajarilgach ochiladi.</p></div><strong className="soft-chip">{done.length} / 30 kun</strong></div><div className="program-progress"><span style={{ width: `${done.length / 30 * 100}%` }} /></div>
     <div className="week-selector"><button className="icon-button" aria-label="Oldingi hafta" disabled={week === 0} onClick={() => setWeek(w => w - 1)}><ChevronLeft size={21} /></button><div className="week-tabs">{[0, 1, 2, 3, 4].map(w => <button className={week === w ? 'selected' : ''} key={w} onClick={() => setWeek(w)}>{w + 1}-hafta</button>)}</div><button className="icon-button" aria-label="Keyingi hafta" disabled={week === 4} onClick={() => setWeek(w => w + 1)}><ChevronRight size={21} /></button></div>
     <div className="days-grid">{gymDays.slice(week * 7, week * 7 + 7).map(a => {
@@ -164,7 +171,10 @@ function ActivityLibrary({ kind, start, sessions }: { kind: 'games' | 'motor'; s
 }
 function ArrowUpRight() { return <ArrowRight size={18} className="arrow-diagonal" />; }
 
-function Monitoring({ progress, navigate, notify }: { progress: Progress; navigate: (section: Section) => void; notify: (message: string) => void }) {
+function Monitoring({ progress, store, update, navigate, notify, start }: { progress: ChildView; store: Progress; update: (change: (p: Progress) => Progress) => void; navigate: (section: Section) => void; notify: (message: string) => void; start: (activityId: string) => void }) {
+  const [measuring, setMeasuring] = useState<TestId | null>(null);
+  const child = activeChild(store);
+  const tips = recommendations(progress.sessions, store.assessments, child.id, store.role);
   const [period, setPeriod] = useState('week');
   const [kind, setKind] = useState('all');
   const cutoff = new Date(`${dateKey()}T00:00:00+05:00`); cutoff.setUTCDate(cutoff.getUTCDate() - (period === 'week' ? 6 : 29));
@@ -172,15 +182,58 @@ function Monitoring({ progress, navigate, notify }: { progress: Progress; naviga
   const activeDays = new Set(sessions.map(s => dateKey(new Date(s.at)))).size;
   const [expanded, setExpanded] = useState(false);
   const weeks = weekDays(sessions); const max = Math.max(3, ...weeks.map(w => sessions.filter(s => dateKey(new Date(s.at)) === w.key).length));
-  return <div className="inner-page"><PageHeading eyebrow="HAR BIR YUTUQ QADRLI" title="Rivojlanish kundaligi" description={`${progress.profile.name}ning kichik qadamlari va quvonchli yutuqlari.`}><button className="outline-button" disabled={!progress.sessions.length} onClick={() => { downloadReport(progress); notify('Barcha natijalar CSV fayliga yuklandi.'); }}><ArrowDownToLine size={17} /> Natijalarni yuklash</button></PageHeading>
+  return <div className="inner-page"><PageHeading eyebrow="HAR BIR YUTUQ QADRLI" title="Rivojlanish kundaligi" description={`${progress.profile.name}ning kichik qadamlari va quvonchli yutuqlari.`}><button className="outline-button" disabled={!store.sessions.length && !store.assessments.length} onClick={() => exportReport(store).then(() => notify('Barcha bolalar natijalari CSV fayliga yuklandi.'), () => notify('Natijalarni yuklab bo‘lmadi. Qayta urinib ko‘ring.'))}><ArrowDownToLine size={17} /> Natijalarni yuklash</button></PageHeading>
+    {store.children.length > 1 && <ChildSwitcher store={store} select={id => update(p => ({ ...p, activeChildId: id }))} />}
+    <section className="advice-card"><div className="card-heading"><div><h2>Tavsiyalar</h2><p>{store.role === 'teacher' ? 'Tarbiyachi uchun' : 'Ota-ona uchun'} · {child.name} natijalari asosida</p></div><span className="sparkle-icon"><Lightbulb size={19} /></span></div>
+      <ul className="advice-list">{tips.map(t => <li key={t.id} className={`advice ${t.tone}`}><span className="advice-icon">{t.tone === 'praise' ? <Trophy size={17} /> : t.tone === 'care' ? <Heart size={17} /> : t.tone === 'remind' ? <Clock3 size={17} /> : <Sparkles size={17} />}</span><div><strong>{t.title}</strong><p>{t.text}</p>{t.action && <button className="text-button" onClick={() => t.action!.activityId ? start(t.action!.activityId) : navigate(t.action!.section)}>{t.action.label}<ArrowRight size={14} /></button>}</div></li>)}</ul>
+    </section>
+    <section className="tests-section"><div className="section-heading"><div><h2>Jismoniy sifatlar</h2><p>Katta kishi o‘lchab kiritadi · bola o‘zining oldingi natijasi bilan solishtiriladi</p></div><button className="outline-button" onClick={() => setMeasuring(physicalTests[0].id)}><Plus size={16} /> Natija kiritish</button></div>
+      <div className="tests-grid">{physicalTests.map(test => {
+        const history = testHistory(store.assessments, child.id, test.id), last = history[history.length - 1], change = trend(history, test);
+        return <button key={test.id} className="test-card" onClick={() => setMeasuring(test.id)}><small>{test.quality}</small><strong>{test.title}</strong>
+          {last ? <><span className="test-value">{String(last.value).replace('.', ',')}<small> {test.unit}</small></span><Sparkline values={history.map(h => h.value)} lowerIsBetter={test.better === 'lower'} /><span className={`trend ${change}`}>{{ first: 'Birinchi o‘lchov', improved: '↑ Yaxshilandi', same: '→ O‘zgarmadi', declined: '↓ Pasaydi' }[change]} · {uzDate(new Date(last.at), true)}</span></> : <span className="test-empty"><Plus size={15} /> O‘lchov kiritilmagan</span>}
+        </button>;
+      })}</div>
+    </section>
+    {store.role === 'teacher' && store.children.length > 1 && <GroupOverview store={store} select={id => update(p => ({ ...p, activeChildId: id }))} />}
+    {measuring && <AssessmentModal initial={measuring} childName={child.name} close={() => setMeasuring(null)} save={(testId, value, at) => { update(p => addAssessment(p, testId, value, at)); setMeasuring(null); notify('O‘lchov natijasi saqlandi.'); }} />}
     <div className="monitor-filters"><div className="filter-tabs">{[['week', '7 kun'], ['month', '30 kun'], ['all', 'Barchasi']].map(([v, l]) => <button key={v} onClick={() => { setPeriod(v); setExpanded(false); }} className={period === v ? 'selected' : ''} aria-pressed={period === v}>{l}</button>)}</div><label className="select-label">Bo‘lim<select value={kind} onChange={e => { setKind(e.target.value); setExpanded(false); }}><option value="all">Barcha bo‘limlar</option><option value="gym">Gimnastika</option><option value="game">O‘yinlar</option><option value="motor">Mayda motorika</option></select></label></div>
     <div className="metric-grid"><Metric icon={Footprints} color="peach" value={sessions.length} label="Mashg‘ulot bajarildi" unit="ta" /><Metric icon={Clock3} color="mint" value={Math.floor(sessions.reduce((n, s) => n + s.seconds, 0) / 60)} label="Birgalikda faol vaqt" unit="daq" /><Metric icon={Sun} color="butter" value={activeDays} label="Faol kunlar" unit="kun" /><Metric icon={Trophy} color="lavender" value={completedDays(sessions).length} label="Gimnastika dasturi" unit="/ 30" /></div>
     <div className="monitor-charts"><section className="chart-card"><div className="card-heading"><div><h2>Bu haftadagi harakatlar</h2><p>Har bir mashg‘ulot — bitta quvonchli qadam</p></div><span className="chart-legend"><span /> Mashg‘ulotlar</span></div><div className="bar-chart" role="img" aria-label={weeks.map(w => `${w.label}: ${sessions.filter(s => dateKey(new Date(s.at)) === w.key).length} ta mashg‘ulot`).join(', ')}>{weeks.map(w => {
       const count = sessions.filter(s => dateKey(new Date(s.at)) === w.key).length;
       return <div className={`bar-column ${w.today ? 'today' : ''}`} key={w.key}><span className="bar-number">{count}</span><div className="bar-track"><div style={{ height: `${count / max * 100}%` }} /></div><span>{w.label}</span></div>;
     })}</div></section><section className="milestone-card"><div className="milestone-icon"><Trophy size={38} strokeWidth={1.4} /></div><h2>{progress.sessions.length >= 10 ? 'Harakat qahramoni!' : progress.sessions.length >= 1 ? 'Birinchi qadam!' : 'Yutuqlar oldinda!'}</h2><p>{progress.sessions.length >= 10 ? 'O‘nta mashg‘ulotni bajardingiz. Ajoyib mehnat!' : progress.sessions.length >= 1 ? 'Birinchi mashg‘ulot bajarildi. Yana birga davom etamiz!' : 'Birinchi mashg‘ulotni bajarib, sayohatni boshlang.'}</p><span className="milestone-chip"><Star size={15} />{progress.sessions.length >= 10 ? '10 ta mashg‘ulot' : progress.sessions.length ? 'Birinchi mashg‘ulot' : 'Birinchi yutuqni kutyapmiz'}</span></section></div>
-    <section className="history-section"><div className="section-heading"><div><h2>Mashg‘ulotlar tarixi</h2><p>Birgalikda bajarilgan harakatlar</p></div><span className="soft-chip">{sessions.length} ta natija</span></div>{sessions.length ? <><div className="history-list">{sessions.slice(0, expanded ? undefined : 8).map(s => <div className="history-row" key={s.id}><span className={`daily-icon ${s.kind === 'gym' ? 'peach' : s.kind === 'game' ? 'mint' : 'lavender'}`}>{s.kind === 'gym' ? <Footprints size={21} /> : s.kind === 'game' ? <Gamepad2 size={21} /> : <Hand size={21} />}</span><div className="history-name"><strong>{s.title}</strong><small>{kindLabels[s.kind]}{s.day ? ` · ${s.day}-kun` : ''}</small></div><span className="history-date">{uzDate(new Date(s.at), true)}<small>{localTime(new Date(s.at))}</small></span><span className="history-duration">{formatDuration(s.seconds)}</span><span className={`mood-tag ${s.mood}`}>{s.mood === 'happy' ? '😊 Xursand' : s.mood === 'okay' ? '🙂 Yaxshi' : '😌 Charchadim'}</span></div>)}</div>{sessions.length > 8 && <button className="outline-button show-more" onClick={() => setExpanded(v => !v)}>{expanded ? 'Kamroq ko‘rsatish' : 'Barchasini ko‘rsatish'}<ChevronDown size={16} /></button>}</> : <div className="empty-state"><div className="empty-art"><ActivityArt type="flower" /></div><h3>{progress.sessions.length ? 'Bu davrda natija topilmadi' : 'Birinchi qadamdan boshlaymiz'}</h3><p>{progress.sessions.length ? 'Boshqa davr yoki bo‘limni tanlab ko‘ring.' : 'Mashg‘ulotni yakunlang — natijasi shu yerda ko‘rinadi.'}</p><button className="primary-button" onClick={() => navigate('gym')}>Mashqlarga o‘tish<ArrowRight size={17} /></button></div>}</section><div className="quiet-note"><ShieldCheck size={18} /><p>Bu kundalik bajarilgan mashg‘ulotlarni qayd etadi. Ma’lumotlar faqat shu qurilmadagi brauzerda saqlanadi. Jismoniy rivojlanish ko‘rsatkichlari avtomatik o‘lchanmaydi.</p></div>
+    <section className="history-section"><div className="section-heading"><div><h2>Mashg‘ulotlar tarixi</h2><p>Birgalikda bajarilgan harakatlar</p></div><span className="soft-chip">{sessions.length} ta natija</span></div>{sessions.length ? <><div className="history-list">{sessions.slice(0, expanded ? undefined : 8).map(s => <div className="history-row" key={s.id}><span className={`daily-icon ${s.kind === 'gym' ? 'peach' : s.kind === 'game' ? 'mint' : 'lavender'}`}>{s.kind === 'gym' ? <Footprints size={21} /> : s.kind === 'game' ? <Gamepad2 size={21} /> : <Hand size={21} />}</span><div className="history-name"><strong>{s.title}</strong><small>{kindLabels[s.kind]}{s.day ? ` · ${s.day}-kun` : ''}</small></div><span className="history-date">{uzDate(new Date(s.at), true)}<small>{localTime(new Date(s.at))}</small></span><span className="history-duration">{formatDuration(s.seconds)}</span><span className={`mood-tag ${s.mood}`}>{s.mood === 'happy' ? '😊 Xursand' : s.mood === 'okay' ? '🙂 Yaxshi' : '😌 Charchadim'}</span></div>)}</div>{sessions.length > 8 && <button className="outline-button show-more" onClick={() => setExpanded(v => !v)}>{expanded ? 'Kamroq ko‘rsatish' : 'Barchasini ko‘rsatish'}<ChevronDown size={16} /></button>}</> : <div className="empty-state"><div className="empty-art"><ActivityArt type="flower" /></div><h3>{progress.sessions.length ? 'Bu davrda natija topilmadi' : 'Birinchi qadamdan boshlaymiz'}</h3><p>{progress.sessions.length ? 'Boshqa davr yoki bo‘limni tanlab ko‘ring.' : 'Mashg‘ulotni yakunlang — natijasi shu yerda ko‘rinadi.'}</p><button className="primary-button" onClick={() => navigate('gym')}>Mashqlarga o‘tish<ArrowRight size={17} /></button></div>}</section><div className="quiet-note"><ShieldCheck size={18} /><p>Bu kundalik bajarilgan mashg‘ulotlarni qayd etadi. Ma’lumotlar faqat shu qurilmada saqlanadi. Jismoniy ko‘rsatkichlarni katta kishi o‘lchab kiritadi; ilova ularni kamera yoki sensor bilan o‘lchamaydi va yosh me’yorlari bilan solishtirmaydi.</p></div>
   </div>;
+}
+function ChildSwitcher({ store, select }: { store: Progress; select: (id: string) => void }) {
+  return <div className="child-switcher" role="group" aria-label="Bolani tanlash">{store.children.map(c => <button key={c.id} className={c.id === store.activeChildId ? 'selected' : ''} aria-pressed={c.id === store.activeChildId} onClick={() => select(c.id)}><span className="avatar"><Bunny /></span>{c.name}<small>{c.age} yosh</small></button>)}</div>;
+}
+function Sparkline({ values, lowerIsBetter }: { values: number[]; lowerIsBetter: boolean }) {
+  if (values.length < 2) return <span className="sparkline empty" />;
+  const shown = values.slice(-8), min = Math.min(...shown), max = Math.max(...shown), span = max - min || 1;
+  const points = shown.map((v, i) => `${(i / (shown.length - 1)) * 96 + 2},${lowerIsBetter ? (v - min) / span * 22 + 3 : 25 - (v - min) / span * 22}`).join(' ');
+  return <svg className="sparkline" viewBox="0 0 100 28" aria-hidden="true"><polyline points={points} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+function GroupOverview({ store, select }: { store: Progress; select: (id: string) => void }) {
+  const weekAgo = Date.now() - 7 * 86_400_000;
+  return <section className="group-card"><div className="section-heading"><div><h2>Guruh bo‘yicha</h2><p>Har bir bolaning so‘nggi 7 kundagi faolligi</p></div><span className="soft-chip">{store.children.length} bola</span></div>
+    <div className="group-table" role="table" aria-label="Guruh bo‘yicha natijalar"><div role="row" className="group-row head"><span role="columnheader">Bola</span><span role="columnheader">7 kunda</span><span role="columnheader">Gimnastika</span><span role="columnheader">Oxirgi test</span></div>
+      {store.children.map(c => { const own = store.sessions.filter(s => s.childId === c.id), tests = store.assessments.filter(a => a.childId === c.id).sort((a, b) => b.at.localeCompare(a.at));
+        return <button role="row" key={c.id} className={`group-row ${c.id === store.activeChildId ? 'selected' : ''}`} onClick={() => select(c.id)}><span role="cell"><strong>{c.name}</strong><small>{c.age} yosh</small></span><span role="cell">{own.filter(s => new Date(s.at).getTime() >= weekAgo).length} ta</span><span role="cell">{completedDays(own).length} / 30</span><span role="cell">{tests[0] ? uzDate(new Date(tests[0].at), true) : '—'}</span></button>; })}
+    </div></section>;
+}
+function AssessmentModal({ initial, childName, close, save }: { initial: TestId; childName: string; close: () => void; save: (testId: TestId, value: number, at: string) => void }) {
+  const [testId, setTestId] = useState(initial); const [value, setValue] = useState(''); const [date, setDate] = useState(dateKey());
+  const test = testById(testId), number = Number(value.replace(',', '.'));
+  const valid = value.trim() !== '' && Number.isFinite(number) && number >= test.min && number <= test.max && date <= dateKey();
+  const submit = (e: FormEvent) => { e.preventDefault(); if (valid) save(testId, Number((Math.round(number / test.step) * test.step).toFixed(1)), new Date(`${date}T12:00:00+05:00`).toISOString()); };
+  return <Modal title="Jismoniy test natijasi" close={close}><form className="profile-form assessment-form" onSubmit={submit}><h2>{childName}</h2><p>O‘lchovni xavfsiz joyda, katta kishi nazoratida o‘tkazing.</p>
+    <label>Test<select value={testId} onChange={e => { setTestId(e.target.value as TestId); setValue(''); }}>{physicalTests.map(t => <option key={t.id} value={t.id}>{t.quality}: {t.title}</option>)}</select></label>
+    <div className="measure-how"><Info size={17} /><p>{test.how}</p></div>
+    <div className="form-columns"><label>Natija ({test.unit})<input inputMode="decimal" required value={value} onChange={e => setValue(e.target.value)} placeholder={`${test.min}–${test.max}`} /></label><label>Sana<input type="date" required max={dateKey()} value={date} onChange={e => setDate(e.target.value)} /></label></div>
+    {value.trim() !== '' && !valid && <p className="form-error" role="alert">{test.min} dan {test.max} gacha qiymat kiriting.</p>}
+    <button className="primary-button full-width" type="submit" disabled={!valid}><Check size={18} />Saqlash</button></form></Modal>;
 }
 function Metric({ icon: Icon, color, value, label, unit }: { icon: LucideIcon; color: string; value: number; label: string; unit: string }) { return <div className="metric"><span className={`metric-icon ${color}`}><Icon size={22} /></span><strong>{value}<small> {unit}</small></strong><span>{label}</span></div>; }
 
@@ -190,10 +243,21 @@ function Modal({ children, title, close, wide = false }: { children: ReactNode; 
   return <dialog ref={ref} className={`modal ${wide ? 'wide' : ''}`} aria-label={title} onCancel={e => { e.preventDefault(); close(); }} onClick={e => { if (e.target === e.currentTarget) { const r = e.currentTarget.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close(); } }}><div className="modal-top"><span>{title}</span><div className="modal-header-controls"><MusicControl /><button className="icon-button" onClick={close} aria-label="Yopish"><X size={21} /></button></div></div>{children}</dialog>;
 }
 
-function ProfileModal({ progress, close, save }: { progress: Progress; close: () => void; save: (profile: Profile, reduced: boolean) => void }) {
-  const [name, setName] = useState(progress.profile.name); const [age, setAge] = useState(progress.profile.age); const [role, setRole] = useState(progress.profile.role); const [reduced, setReduced] = useState(progress.reducedMotion);
-  const submit = (e: FormEvent) => { e.preventDefault(); if (name.trim()) save({ name: name.trim(), age, role }, reduced); };
-  return <Modal title="Bolajon profili" close={close}><form className="profile-form" onSubmit={submit}><div className="profile-avatar-large"><Bunny /></div><h2>Bolajon bilan tanishamiz</h2><p>Uning kichik yutuqlarini birga kuzatamiz.</p><label>Bolajonning ismi<input autoComplete="off" maxLength={30} required value={name} onChange={e => setName(e.target.value)} placeholder="Ismini yozing" /></label><div className="form-columns"><label>Yoshi<select value={age} onChange={e => setAge(Number(e.target.value))}>{[3, 4, 5, 6, 7].map(n => <option key={n} value={n}>{n} yosh</option>)}</select></label><label>Siz kimsiz?<select value={role} onChange={e => setRole(e.target.value as Profile['role'])}><option value="parent">Ota-ona</option><option value="teacher">Tarbiyachi</option></select></label></div><label className="toggle-label"><span><strong>Kamroq animatsiya</strong><small>Harakatli tasvirlarni to‘xtatish</small></span><input type="checkbox" checked={reduced} onChange={e => setReduced(e.target.checked)} /><span className={`toggle ${reduced ? 'on' : ''}`} aria-hidden="true" /></label><div className="profile-privacy"><ShieldCheck size={17} />Profil faqat shu qurilmada saqlanadi.</div><button className="primary-button full-width" type="submit" disabled={!name.trim()}><Check size={18} />Saqlash</button></form></Modal>;
+function ProfileModal({ store, close, save }: { store: Progress; close: () => void; save: (next: Progress) => void }) {
+  const [draft, setDraft] = useState(store);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const child = activeChild(draft);
+  const edit = (patch: Partial<{ name: string; age: number }>) => setDraft(d => ({ ...d, children: d.children.map(c => c.id === d.activeChildId ? { ...c, ...patch } : c) }));
+  const valid = draft.children.every(c => c.name.trim());
+  const submit = (e: FormEvent) => { e.preventDefault(); if (valid) save({ ...draft, children: draft.children.map(c => ({ ...c, name: c.name.trim() })) }); };
+  return <Modal title="Bolalar profili" close={close}><form className="profile-form" onSubmit={submit}><div className="profile-avatar-large"><Bunny /></div><h2>{draft.role === 'teacher' ? 'Guruhdagi bolalar' : 'Bolajon bilan tanishamiz'}</h2><p>Har bir bolaning yutuqlari alohida kuzatiladi.</p>
+    <label>Siz kimsiz?<select value={draft.role} onChange={e => setDraft(d => ({ ...d, role: e.target.value as Role }))}><option value="parent">Ota-ona</option><option value="teacher">Tarbiyachi</option></select></label>
+    <ChildSwitcher store={draft} select={id => { setConfirmRemove(false); setDraft(d => ({ ...d, activeChildId: id })); }} />
+    <label>Bolajonning ismi<input autoComplete="off" maxLength={30} required value={child.name} onChange={e => edit({ name: e.target.value })} placeholder="Ismini yozing" /></label>
+    <label>Yoshi<select value={child.age} onChange={e => edit({ age: Number(e.target.value) })}>{[3, 4, 5, 6, 7].map(n => <option key={n} value={n}>{n} yosh</option>)}</select></label>
+    <div className="child-actions"><button type="button" className="outline-button" disabled={draft.children.length >= 40} onClick={() => { setConfirmRemove(false); setDraft(d => addChild(d, `Bola ${d.children.length + 1}`, 5)); }}><Plus size={16} />Bola qo‘shish</button>
+      {draft.children.length > 1 && (confirmRemove ? <span className="remove-confirm" role="alert">{child.name}ning barcha natijalari o‘chiriladi.<button type="button" className="text-button danger" onClick={() => { setDraft(d => removeChild(d, d.activeChildId)); setConfirmRemove(false); }}>Ha, o‘chirish</button><button type="button" className="text-button" onClick={() => setConfirmRemove(false)}>Bekor qilish</button></span> : <button type="button" className="text-button danger" onClick={() => setConfirmRemove(true)}>Bu bolani o‘chirish</button>)}</div>
+    <label className="toggle-label"><span><strong>Kamroq animatsiya</strong><small>Harakatli tasvirlarni to‘xtatish</small></span><input type="checkbox" checked={draft.reducedMotion} onChange={e => setDraft(d => ({ ...d, reducedMotion: e.target.checked }))} /><span className={`toggle ${draft.reducedMotion ? 'on' : ''}`} aria-hidden="true" /></label><div className="profile-privacy"><ShieldCheck size={17} />Profillar faqat shu qurilmada saqlanadi.</div><button className="primary-button full-width" type="submit" disabled={!valid}><Check size={18} />Saqlash</button></form></Modal>;
 }
 
 function HelpModal({ close }: { close: () => void }) {
@@ -209,7 +273,6 @@ function ActivityPlayer({ activity, close, save, reducedMotion }: { activity: Ac
   const { setAnimationRunning } = useMusic();
   const motionReduced = useReducedMotion(reducedMotion);
   const story = activity.id === 'rabbit';
-  const usesCharacter = story || activity.kind === 'gym';
   const [characterMoving, setCharacterMoving] = useState(false);
   const [characterReady, setCharacterReady] = useState(false);
   const [replay, setReplay] = useState(0);
@@ -229,8 +292,8 @@ function ActivityPlayer({ activity, close, save, reducedMotion }: { activity: Ac
   const step = activity.steps[stage];
   const duration = step?.seconds ?? 12;
   const found = stars[stage] ?? [];
-  const clockRunning = active && !paused && !exit && visible && (!usesCharacter || characterReady || motionReduced);
-  const animationRunning = animationIsRunning({ active: active && visible, paused, exiting: exit, reducedMotion: motionReduced, isRive: usesCharacter, characterMoving, stopCue: step?.cue === 'To‘xta' });
+  const clockRunning = active && !paused && !exit && visible && (characterReady || motionReduced);
+  const animationRunning = animationIsRunning({ active: active && visible, paused, exiting: exit, reducedMotion: motionReduced, isRive: true, characterMoving, stopCue: step?.cue === 'To‘xta' });
 
   useEffect(() => {
     const update = () => setVisible(!document.hidden);
@@ -285,14 +348,14 @@ function ActivityPlayer({ activity, close, save, reducedMotion }: { activity: Ac
     </div> : active ? <div className="player-content">
       <div className="step-heading"><span>{stage + 1} / {activity.steps.length} bosqich</span><span className="player-clock"><Clock3 size={15} />{String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</span></div>
       <div className="step-track">{activity.steps.map((_, i) => <span key={i} className={i <= stage ? 'filled' : ''} />)}</div>
-      <div className={`player-scene ${activity.color} ${paused ? 'paused' : ''} ${usesCharacter ? 'has-rive has-3d' : ''}`}>
+      <div className={`player-scene ${activity.color} ${paused ? 'paused' : ''} has-rive has-3d`}>
         <div className="scene-sun"><Sun size={42} strokeWidth={1.4} /></div><div className="scene-cloud cloud-left" /><div className="scene-cloud cloud-right" /><div className="scene-ground" />
-        {usesCharacter && <GardenScenery still={!animationRunning} celebration={step.pose === 'celebrate' || (!!step.challenge && found.length === 3)} />}
-        {usesCharacter ? <Suspense fallback={<Bunny pose={step.pose} />}><Bunny3D key={replay} pose={step.pose} paused={paused || exit || !visible} reducedMotion={motionReduced} onMotionChange={setCharacterMoving} onReadyChange={setCharacterReady} /></Suspense> : <Bunny pose={step.pose} animated={animationRunning} />}
+        <GardenScenery still={!animationRunning} celebration={step.pose === 'celebrate' || (!!step.challenge && found.length === 3)} />
+        <Suspense fallback={<Bunny pose={step.pose} />}><Bunny3D key={replay} pose={step.pose} paused={paused || exit || !visible} reducedMotion={motionReduced} onMotionChange={setCharacterMoving} onReadyChange={setCharacterReady} /></Suspense>
         {step.challenge && <StarChallenge found={found} collect={collectStar} paused={!clockRunning} />}
-        {usesCharacter && !motionReduced && <button className="replay-animation" aria-label="Harakatni qayta ko‘rish" disabled={paused || !characterReady} onClick={replayScene}><RotateCcw size={15} /> Qayta ko‘rish</button>}
+        {!motionReduced && <button className="replay-animation" aria-label="Harakatni qayta ko‘rish" disabled={paused || !characterReady} onClick={replayScene}><RotateCcw size={15} /> Qayta ko‘rish</button>}
         <span className="scene-flower">✿</span>{paused && <div className="pause-overlay"><Pause size={32} /><strong>Tanaffus</strong></div>}
-        <span className={`visual-cue ${step.cue === 'To‘xta' ? 'stop-cue' : ''}`}>{step.cue === 'To‘xta' ? <Hand size={20} /> : <Check size={19} />}{step.cue}</span>
+        <CommandCard key={`${stage}-${replay}`} step={step} paused={paused} />
       </div>
       <SceneProgress elapsed={sceneSeconds} duration={duration} story={story} auto={autoAdvance} toggleAuto={() => setAutoAdvance(a => !a)} challenge={!!step.challenge} collected={found.length} reduced={motionReduced} />
       <h2>{step.title}</h2><p className="step-instruction" aria-live="polite">{step.instruction}</p>

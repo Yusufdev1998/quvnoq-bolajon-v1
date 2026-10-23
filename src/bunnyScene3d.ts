@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { BunnyPose3D } from './bunnyMotion3d';
 
-type Limb = { shoulder: THREE.Group; elbow: THREE.Group };
+type Limb = { shoulder: THREE.Group; elbow: THREE.Group; paw: THREE.Mesh };
 const up = new THREE.Vector3(0, 1, 0);
 
 export function createBunnyScene(canvas: HTMLCanvasElement) {
@@ -12,7 +12,7 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-2.5, 2.5, 4.25, -.35, .1, 40);
   camera.position.set(.25, 3.05, 9);
@@ -55,20 +55,33 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
     const mesh = new THREE.Mesh(new THREE.TubeGeometry(path, 20, radius, 5, false), material);
     parent.add(mesh); return mesh;
   }
-  function fuzz(parent: THREE.Object3D, center: number[], radii: number[], count: number, avoidFace = false) {
+  // Tufts lie along the surface in the direction the fur grows (comb), slightly lifted,
+  // like layered strands; without a comb they stand out radially for a cotton-ball tail.
+  function fuzz(parent: THREE.Object3D, center: number[], radii: number[], count: number, skip?: (x: number, y: number, z: number) => boolean, comb?: THREE.Vector3) {
     const mesh = new THREE.InstancedMesh(tuftGeometry, fur, count);
-    const dummy = new THREE.Object3D(); const normal = new THREE.Vector3();
+    const dummy = new THREE.Object3D(); const normal = new THREE.Vector3(), flow = new THREE.Vector3(), side = new THREE.Vector3(), basis = new THREE.Matrix4();
     let used = 0;
     for (let i = 0; i < count; i++) {
       const y = 1 - (i + .5) / count * 2;
       const r = Math.sqrt(1 - y * y), angle = i * 2.399963;
       const x = Math.cos(angle) * r, z = Math.sin(angle) * r;
-      if (avoidFace && z > .65 && y < .5 && y > -.7) continue;
+      if (skip?.(x, y, z)) continue;
       normal.set(x / radii[0], y / radii[1], z / radii[2]).normalize();
       const size = .014 + (Math.sin(i * 71.17) + 1) * .004;
       dummy.position.set(center[0] + x * radii[0], center[1] + y * radii[1], center[2] + z * radii[2]);
-      dummy.quaternion.setFromUnitVectors(up, normal);
-      dummy.scale.set(size, size * 1.7, size * .85); dummy.updateMatrix();
+      if (comb) {
+        flow.copy(comb).addScaledVector(normal, -comb.dot(normal));
+        if (flow.lengthSq() < .01) flow.set(0, 0, 1).addScaledVector(normal, -normal.z);
+        flow.normalize().addScaledVector(normal, .45).normalize();
+        side.crossVectors(flow, normal).normalize();
+        basis.makeBasis(side, flow, normal); dummy.quaternion.setFromRotationMatrix(basis);
+        dummy.position.addScaledVector(flow, size * .9);
+        dummy.scale.set(size * 1.25, size * 2.3, size * .55);
+      } else {
+        dummy.quaternion.setFromUnitVectors(up, normal);
+        dummy.scale.set(size, size * 1.7, size * .85);
+      }
+      dummy.updateMatrix();
       mesh.setMatrixAt(used++, dummy.matrix);
     }
     mesh.count = used; mesh.instanceMatrix.needsUpdate = true;
@@ -90,7 +103,7 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
 
   const head = new THREE.Group(); head.position.set(0, 1.35, .015); body.add(head);
   ball(head, fur, [0, 0, 0], [.60, .555, .46]);
-  fuzz(head, [0, 0, 0], [.60, .555, .46], 950, true);
+  fuzz(head, [0, 0, 0], [.60, .555, .46], 1100, (_x, y, z) => z > .65 && y < .5 && y > -.7, new THREE.Vector3(0, -1, -.35));
   // Separate rounded cheeks give the muzzle depth without obscuring the mouth.
   ball(head, muzzleMaterial, [-.145, -.19, .414], [.22, .16, .14]);
   ball(head, muzzleMaterial, [.145, -.19, .414], [.22, .16, .14]);
@@ -98,10 +111,11 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
   curve(head, [[0, -.16, .565], [0, -.215, .566], [-.065, -.245, .55], [-.11, -.228, .54]], .009, mouthMaterial);
   curve(head, [[0, -.215, .566], [.065, -.245, .55], [.11, -.228, .54]], .009, mouthMaterial);
   const eyes: THREE.Group[] = [];
+  const pupils: THREE.Mesh[] = [];
   for (const side of [-1, 1]) {
     const eye = new THREE.Group(); eye.position.set(side * .235, .075, .417); eye.rotation.y = side * .19; head.add(eye); eyes.push(eye);
     ball(eye, iris, [0, 0, 0], [.112, .146, .06]);
-    ball(eye, pupil, [side * -.012, .005, .046], [.075, .106, .032]);
+    pupils.push(ball(eye, pupil, [side * -.012, .005, .046], [.075, .106, .032]));
     ball(eye, glint, [-.029, .052, .074], [.028, .034, .014]);
     ball(eye, glint, [.031, -.035, .074], [.011, .013, .008]);
     curve(head, [[side * .15, .275, .40], [side * .235, .30, .397], [side * .31, .27, .37]], .012, mouthMaterial);
@@ -113,7 +127,7 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
     const ear = new THREE.Group(); ear.position.set(side * .275, .425, -.025); head.add(ear); ears.push(ear);
     ball(ear, fur, [0, .40, 0], [.165, .50, .115]);
     ball(ear, pink, [0, .43, .096], [.104, .389, .034]);
-    fuzz(ear, [0, .40, 0], [.165, .50, .115], 160);
+    fuzz(ear, [0, .40, 0], [.165, .50, .115], 180, (x, _y, z) => z > .35 && Math.abs(x) < .8, new THREE.Vector3(0, 1, 0));
     const tip = new THREE.Group(); tip.position.y = .72; ear.add(tip); earTips.push(tip);
     ball(tip, fur, [0, .105, -.005], [.132, .23, .095]);
     ball(tip, pink, [0, .075, .075], [.077, .15, .025]);
@@ -128,17 +142,27 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
     ball(elbow, fur, [0, -.13, 0], [.115, .205, .12]);
     const paw = ball(elbow, muzzleMaterial, [0, -.325, .025], [.139, .155, .135]);
     ball(paw, pink, [0, -.05, .90], [.32, .36, .12]);
-    arms.push({ shoulder, elbow });
+    arms.push({ shoulder, elbow, paw });
   }
   const legs = [-1, 1].map(side => {
     const thigh = ball(scene, fur, [0, 0, 0], [.145, .22, .15]);
     const calf = ball(scene, fur, [0, 0, 0], [.12, .22, .13]);
     const knee = ball(scene, fur, [0, 0, 0], [.135, .135, .135]);
+    // The foot pivots at the ball of the toes, so raising the heel keeps the toes planted.
     const foot = new THREE.Group(); scene.add(foot);
-    ball(foot, fur, [0, .12, .12], [.18, .125, .285]);
-    for (let toe = -1; toe <= 1; toe++) curve(foot, [[toe * .067, .19, .29], [toe * .067, .17, .35]], .004, mouthMaterial);
+    ball(foot, fur, [0, .12, -.18], [.18, .125, .285]);
+    for (let toe = -1; toe <= 1; toe++) curve(foot, [[toe * .067, .19, -.01], [toe * .067, .17, .05]], .004, mouthMaterial);
     return { side, thigh, calf, knee, foot };
   });
+
+  // A soft toy ball held between the paws; its squash follows how hard the paws press.
+  const ballTexture = toyBallTexture();
+  const toyBall = new THREE.Mesh(sphere, new THREE.MeshStandardMaterial({ map: ballTexture, roughness: .55 }));
+  toyBall.castShadow = true; toyBall.visible = false; scene.add(toyBall);
+  // An elastic ring looped around both paws; it lengthens as the paws pull apart.
+  const elastic = new THREE.Mesh(new THREE.TorusGeometry(1, .075, 12, 48), new THREE.MeshStandardMaterial({ color: '#d9584a', roughness: .45 }));
+  elastic.castShadow = true; elastic.visible = false; scene.add(elastic);
+  const pawL = new THREE.Vector3(), pawR = new THREE.Vector3();
 
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: .20 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = -.008; ground.receiveShadow = true; scene.add(ground);
@@ -156,20 +180,48 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
     mesh.scale.set(width, direction.length() / 2 + .065, width);
   }
   function update(p: BunnyPose3D) {
-    body.position.set(p.x, .85 + p.y, 0); body.rotation.set(0, .10 + p.turn, p.lean);
-    chest.scale.y = .55 + p.breath;
+    body.position.set(p.x, .85 + p.y, 0); body.rotation.set(p.pitch, .10 + p.turn, p.lean);
+    // Volume-preserving squash and stretch around the hips.
+    body.scale.set(1 + p.squash * .5, 1 - p.squash, 1 + p.squash * .5);
+    chest.scale.set(.43 - p.belly * .3, .55 + p.breath + p.belly, .31 - p.belly * .3);
     head.rotation.set(p.headNod, p.headTurn, p.headTilt);
     eyes.forEach(eye => { eye.scale.y = p.blink; });
-    ears[0].rotation.set(p.earLag, 0, p.earL); ears[1].rotation.set(-p.earLag * .7, 0, p.earR);
-    earTips[0].rotation.x = p.earLag * 1.6 + .045; earTips[1].rotation.x = p.earLag * 1.3 + .025;
+    pupils.forEach((pupilMesh, i) => { pupilMesh.position.x = (i ? -.012 : .012) + p.gazeX * .024; pupilMesh.position.y = .005 + p.gazeY * .022; });
+    ears[0].rotation.set(p.earLag, 0, p.earL); ears[1].rotation.set(p.earLag * .82, 0, p.earR);
+    earTips[0].rotation.x = p.earLag * .9 + p.earTip + .045; earTips[1].rotation.x = p.earLag * .75 + p.earTip * 1.15 + .025;
+    tail.position.y = .17 + p.tail * .08; tail.rotation.set(p.tail * .6, 0, p.tail * .4);
     arms[0].shoulder.rotation.set(p.swingL, 0, p.armL); arms[1].shoulder.rotation.set(p.swingR, 0, p.armR);
-    arms[0].elbow.rotation.z = p.elbowL; arms[1].elbow.rotation.z = p.elbowR;
+    arms[0].elbow.rotation.set(p.flexL, 0, p.elbowL); arms[1].elbow.rotation.set(p.flexR, 0, p.elbowR);
+    // Open paws spread wide and flat; a fist is smaller and rounder.
+    // Open paws turn their palms outward (more so the higher the forearm is raised); fists curl in.
+    arms.forEach((arm, i) => {
+      const g = i ? p.gripR : p.gripL, flex = i ? p.flexR : p.flexL;
+      arm.paw.scale.set(.139 * (1.1 - g * .22), .155 * (1.06 - g * .2), .135 * (.94 + g * .1));
+      arm.paw.rotation.x = Math.min(1, -flex / 1.75) * (1.5 - g * 1.9);
+    });
     body.updateMatrixWorld(true);
+    toyBall.visible = p.ball > .02; elastic.visible = p.ring > .02;
+    if (toyBall.visible || elastic.visible) { arms[0].paw.getWorldPosition(pawL); arms[1].paw.getWorldPosition(pawR); }
+    if (elastic.visible) {
+      const half = pawL.distanceTo(pawR) / 2 + .06;
+      elastic.position.copy(pawL).add(pawR).multiplyScalar(.5); elastic.position.z += .05;
+      elastic.scale.set(half * p.ring, Math.max(.08, .26 - half * .25) * p.ring, p.ring);
+      elastic.rotation.set(0, body.rotation.y, Math.atan2(pawR.y - pawL.y, pawR.x - pawL.x));
+    }
+    if (toyBall.visible) {
+      const gap = Math.max(.1, pawL.distanceTo(pawR) / 2 - .115), radius = .27 * p.ball;
+      const across = Math.min(radius, gap * p.ball), bulge = radius + (radius - across) * .6;
+      toyBall.position.copy(pawL).add(pawR).multiplyScalar(.5); toyBall.position.z += .03;
+      toyBall.scale.set(across, bulge, bulge); toyBall.rotation.set(.3, body.rotation.y, 0);
+    }
     for (const leg of legs) {
       const left = leg.side < 0;
       hip.set(leg.side * .215, .0, .015).applyMatrix4(body.matrixWorld);
       const fx = left ? p.footLX : p.footRX, fy = left ? p.footLY : p.footRY, fz = left ? p.footLZ : p.footRZ;
-      ankle.set(fx, .17 + fy, fz);
+      leg.foot.position.set(fx, fy, fz + .3);
+      leg.foot.rotation.set(left ? p.heelL : p.heelR, leg.side * .07, 0);
+      leg.foot.updateMatrix();
+      ankle.set(0, .17, -.3).applyMatrix4(leg.foot.matrix);
       direction.subVectors(ankle, hip);
       const distance = Math.min(direction.length(), .759);
       direction.normalize();
@@ -178,10 +230,10 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
       kneePoint.copy(hip).add(ankle).multiplyScalar(.5).addScaledVector(bend, kneeOffset);
       leg.knee.position.copy(kneePoint);
       segment(leg.thigh, hip, kneePoint, .14); segment(leg.calf, kneePoint, ankle, .12);
-      leg.foot.position.set(fx, fy, fz); leg.foot.rotation.y = leg.side * .07;
     }
-    contact.position.x = p.x; contact.scale.setScalar(1 - Math.max(0, p.y) * .5);
-    contactMaterial.opacity = .24 - Math.max(0, p.y) * .35;
+    const airborne = Math.max(0, Math.min(p.footLY, p.footRY));
+    contact.position.x = p.x; contact.scale.setScalar(1 - airborne * 1.1 + Math.max(0, -p.y) * .4);
+    contactMaterial.opacity = Math.max(.06, .24 - airborne * .5);
   }
   function resize(width: number, height: number) {
     renderer.setSize(width, height, false);
@@ -202,7 +254,7 @@ export function createBunnyScene(canvas: HTMLCanvasElement) {
         }
       });
       geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose());
-      knit.dispose(); contactTexture.dispose(); key.shadow.map?.dispose(); renderer.dispose(); renderer.forceContextLoss();
+      knit.dispose(); contactTexture.dispose(); ballTexture.dispose(); key.shadow.map?.dispose(); renderer.dispose(); renderer.forceContextLoss();
     },
   };
 }
@@ -215,6 +267,12 @@ function knitTexture() {
     ctx.beginPath(); ctx.moveTo(x - 2, y - 4); ctx.quadraticCurveTo(x - 2, y, x, y + 2); ctx.quadraticCurveTo(x + 2, y, x + 2, y - 4); ctx.stroke();
   }
   const texture = new THREE.CanvasTexture(canvas); texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(3, 3); return texture;
+}
+function toyBallTexture() {
+  const canvas = document.createElement('canvas'); canvas.width = 128; canvas.height = 64;
+  const ctx = canvas.getContext('2d')!; ctx.fillStyle = '#f4be55'; ctx.fillRect(0, 0, 128, 64);
+  ctx.fillStyle = '#e48b57'; for (const x of [14, 46, 78, 110]) ctx.fillRect(x, 0, 7, 64);
+  const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; return texture;
 }
 function shadowTexture() {
   const canvas = document.createElement('canvas'); canvas.width = canvas.height = 64;

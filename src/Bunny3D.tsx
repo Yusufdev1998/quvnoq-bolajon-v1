@@ -2,21 +2,27 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { Step } from './data';
 import { Bunny } from './Illustrations';
 import { createBunnyScene } from './bunnyScene3d';
-import { blendBunnyPoses, sampleBunnyMotion } from './bunnyMotion3d';
+import { blendBunnyPoses, createSecondaryMotion, sampleBunnyMotion, transitionSeconds } from './bunnyMotion3d';
 
 const RiveFallback = lazy(() => import('./RiveBunny'));
 type Props = { pose: Step['pose']; paused: boolean; reducedMotion: boolean; onMotionChange: (moving: boolean) => void; onReadyChange: (ready: boolean) => void };
 
 export default function Bunny3D(props: Props) {
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const host = useRef<HTMLDivElement>(null);
   const latest = useRef(props); latest.current = props;
   const [status, setStatus] = useState<'loading' | 'ready' | 'fallback'>('loading');
   useEffect(() => {
-    const element = canvas.current!;
+    // A fresh canvas per mount: a canvas whose WebGL context was released on unmount
+    // (as React StrictMode does once in development) can never create a renderer again.
+    const element = document.createElement('canvas');
+    element.setAttribute('role', 'img');
+    element.setAttribute('aria-label', 'Harakatlarni ko‘rsatayotgan uch o‘lchamli quyoncha');
+    host.current!.appendChild(element);
+    const secondary = createSecondaryMotion();
     let scene: ReturnType<typeof createBunnyScene> | undefined;
     let frame = 0, lastTime = 0, elapsed = 0, transition = 1;
     let action = latest.current.pose;
-    let current = sampleBunnyMotion(action, 0), from = current;
+    let current = sampleBunnyMotion(action, 0), from = current, shown = current;
     let disposed = false, dirty = true, announcedReady = false, wasReduced = latest.current.reducedMotion;
     const fail = () => {
       if (disposed) return;
@@ -41,15 +47,16 @@ export default function Bunny3D(props: Props) {
         const { pose, paused, reducedMotion } = latest.current;
         if (reducedMotion !== wasReduced) { wasReduced = reducedMotion; dirty = true; }
         if (pose !== action) { from = current; action = pose; elapsed = 0; transition = 0; dirty = true; }
-        const moving = !paused && !reducedMotion && pose !== 'stretch' && pose !== 'hands' && pose !== 'ball';
+        // Still poses keep breathing and blinking; only the reduced-motion view is fully static.
         if (!paused && !reducedMotion && !document.hidden) {
-          elapsed += dt; transition = Math.min(1, transition + dt / .42);
+          elapsed += dt; transition = Math.min(1, transition + dt / transitionSeconds(action));
           current = blendBunnyPoses(from, sampleBunnyMotion(action, elapsed), transition);
-          if (moving || transition < 1) dirty = true;
+          shown = secondary.apply(current, dt);
+          dirty = true;
         }
-        if (reducedMotion) { current = sampleBunnyMotion(action, 0); }
+        if (reducedMotion) { current = shown = sampleBunnyMotion(action, 0); secondary.reset(); }
         if (dirty) {
-          try { scene.update(current); scene.render(); } catch { fail(); return; }
+          try { scene.update(shown); scene.render(); } catch { fail(); return; }
           dirty = false;
           if (!announcedReady) { announcedReady = true; setStatus('ready'); }
         }
@@ -60,18 +67,17 @@ export default function Bunny3D(props: Props) {
     return () => {
       disposed = true; cancelAnimationFrame(frame); resize.disconnect();
       element.removeEventListener('webglcontextlost', contextLost);
-      latest.current.onReadyChange(false); latest.current.onMotionChange(false); scene?.dispose();
+      latest.current.onReadyChange(false); latest.current.onMotionChange(false); scene?.dispose(); element.remove();
     };
   }, []);
   useEffect(() => {
     if (status === 'fallback') return;
     props.onReadyChange(status === 'ready');
-    props.onMotionChange(status === 'ready' && !props.paused && !props.reducedMotion && !['stretch', 'hands', 'ball'].includes(props.pose));
+    props.onMotionChange(status === 'ready' && !props.paused && !props.reducedMotion && props.pose !== 'still');
   }, [status, props.pose, props.paused, props.reducedMotion, props.onReadyChange, props.onMotionChange]);
 
   if (status === 'fallback') return <Suspense fallback={<div className="rive-bunny static-bunny"><Bunny pose={props.pose} /></div>}><RiveFallback {...props} /></Suspense>;
-  return <div className="bunny-3d" data-character-status={status} data-motion={props.pose} data-playback={props.paused ? 'paused' : props.reducedMotion ? 'still' : 'playing'}>
+  return <div ref={host} className="bunny-3d" data-character-status={status} data-motion={props.pose} data-playback={props.paused ? 'paused' : props.reducedMotion ? 'still' : 'playing'}>
     {status === 'loading' && <span className="character-loading" role="status">Quyoncha tayyorlanyapti…</span>}
-    <canvas ref={canvas} role="img" aria-label="Harakatlarni ko‘rsatayotgan uch o‘lchamli quyoncha" />
   </div>;
 }
