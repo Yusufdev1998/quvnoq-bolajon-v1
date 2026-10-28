@@ -1,11 +1,11 @@
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Ruler, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { formatDate, toISODate } from '../../core/dates.ts';
 import { dispatch, newId, type AthleteContext } from '../../core/store.ts';
 import { ageOf, bmi, formatValue, jumpNorm, METRIC_GROUPS, METRICS, rateVerticalJump, RATING_LABEL, rufierRating, validateValue, type Rating } from '../../domain/metrics.ts';
 import type { MetricKey, MetricValues } from '../../domain/types.ts';
 import { confirmAction } from '../../ui/confirm.tsx';
-import { Card, PageHeader, Pill, SectionTitle } from '../../ui/kit.tsx';
+import { Card, Empty, PageHeader, Pill, SectionTitle } from '../../ui/kit.tsx';
 import { POSITION_LABEL } from '../team/AthleteForm.tsx';
 
 const RATING_TONE: Record<Rating, 'good' | 'warn' | 'bad'> = { yuqori: 'good', orta: 'warn', past: 'bad' };
@@ -112,7 +112,9 @@ export function MetricsPage({ ctx }: { ctx: AthleteContext }) {
 
       <SectionTitle>O‘lchovlar tarixi</SectionTitle>
       {ctx.entries.length === 0 ? (
-        <p className="muted">Hali o‘lchov kiritilmagan. Yuqoridagi “+” tugmasi orqali boshlang‘ich testni kiriting.</p>
+        <Empty icon={<Ruler />} art="empty-metrics" title="Hali o‘lchov kiritilmagan">
+          Yuqoridagi “+” tugmasi orqali boshlang‘ich testni kiriting.
+        </Empty>
       ) : (
         <ul className="history">
           {ctx.entries.map((e) => (

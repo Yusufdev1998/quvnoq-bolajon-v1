@@ -5,6 +5,7 @@ import type { AthleteContext } from '../../core/store.ts';
 import { metricSeries, sessionContacts, trend, ZONE_LABEL } from '../../domain/analytics.ts';
 import { blockInfo } from '../../domain/catalog.ts';
 import { estimateMinutes } from '../../domain/load.ts';
+import { artFocus, artUrl } from '../../ui/art.tsx';
 import { AdviceList, Card, Meter, SectionTitle, Stat } from '../../ui/kit.tsx';
 import { useAppState } from '../../core/store.ts';
 
@@ -12,6 +13,7 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
   const state = useAppState();
   const now = new Date();
   const info = blockInfo(ctx.block);
+  const cover = artUrl(`block-${ctx.block}`);
   const planned = ctx.todayPlan.reduce((s, p) => s + p.contacts, 0);
   const weekStart = toISODate(startOfWeek(now));
   const weekContacts = ctx.sessions.filter((s) => s.date >= weekStart).reduce((s, x) => s + sessionContacts(x), 0);
@@ -28,7 +30,8 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
         </h1>
       </header>
 
-      <section className="today" style={{ '--block': info.color } as React.CSSProperties}>
+      <section className={`today ${cover ? 'today--art' : ''}`} style={{ '--block': info.color } as React.CSSProperties}>
+        {cover && <div className="today__art" style={{ backgroundImage: `url(${cover})`, backgroundPosition: artFocus(`block-${ctx.block}`) }} aria-hidden />}
         <div className="today__top">
           <span className="today__badge">{ctx.block}-blok</span>
           <span className="today__name">{info.name}</span>

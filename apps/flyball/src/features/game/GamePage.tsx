@@ -6,6 +6,7 @@ import { blockInfo, GAME_DRILLS, GAME_ELEMENTS } from '../../domain/catalog.ts';
 import { prescribe } from '../../domain/load.ts';
 import type { GameElement } from '../../domain/types.ts';
 import { AthleteMotion } from '../../ui/AthleteMotion.tsx';
+import { Artwork } from '../../ui/art.tsx';
 import { IntensityBars, PageHeader, Segmented } from '../../ui/kit.tsx';
 
 export function GamePage({ ctx }: { ctx: AthleteContext }) {
@@ -29,7 +30,7 @@ export function GamePage({ ctx }: { ctx: AthleteContext }) {
           return (
             <a key={d.id} href={href({ name: 'drill', id: d.id })} className={`drill ${locked ? 'is-locked' : ''}`} style={{ '--block': blockInfo(d.minBlock).color } as React.CSSProperties}>
               <div className="drill__art">
-                <AthleteMotion motion={d.motion} label={d.name} />
+                <Artwork name={`drill-${d.id}`} alt="" fallback={<AthleteMotion motion={d.motion} label={d.name} />} />
               </div>
               <div className="drill__body">
                 <div className="drill__meta">

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { Advice } from '../domain/analytics.ts';
 import { INTENSITY_LABEL } from '../domain/catalog.ts';
 import type { Intensity } from '../domain/types.ts';
+import { Artwork } from './art.tsx';
 
 export function PageHeader({ eyebrow, title, back, action }: { eyebrow?: string; title: string; back?: string; action?: ReactNode }) {
   return (
@@ -108,10 +109,11 @@ export function AdviceList({ items }: { items: Advice[] }) {
   );
 }
 
-export function Empty({ icon, title, children }: { icon: ReactNode; title: string; children?: ReactNode }) {
+export function Empty({ icon, art, title, children }: { icon: ReactNode; art?: string; title: string; children?: ReactNode }) {
+  const iconBox = <div className="empty__icon">{icon}</div>;
   return (
-    <div className="empty">
-      <div className="empty__icon">{icon}</div>
+    <div className={`empty ${art ? 'empty--art' : ''}`}>
+      {art ? <Artwork name={art} alt="" className="empty__art" fallback={iconBox} /> : iconBox}
       <strong>{title}</strong>
       {children && <p>{children}</p>}
     </div>

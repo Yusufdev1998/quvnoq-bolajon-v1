@@ -7,6 +7,7 @@ import { blockInfo, exercisesOfBlock, GAME_DRILLS, GAME_ELEMENTS } from '../../d
 import { estimateMinutes, planWorkout, type PlannedItem } from '../../domain/load.ts';
 import type { Dosable, Exercise, GameDrill, Motion } from '../../domain/types.ts';
 import { AthleteMotion } from '../../ui/AthleteMotion.tsx';
+import { Artwork } from '../../ui/art.tsx';
 import { confirmAction } from '../../ui/confirm.tsx';
 import { Empty } from '../../ui/kit.tsx';
 
@@ -180,7 +181,11 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
       </div>
       <div className="runner__body">
         <div className="stage stage--runner" style={{ '--block': setup.color } as React.CSSProperties}>
-          <AthleteMotion motion={current.item.motion} label={current.item.name} />
+          <Artwork
+            name={`${setup.kind === 'plyo' ? 'ex' : 'drill'}-${current.item.id}`}
+            alt={current.item.name}
+            fallback={<AthleteMotion motion={current.item.motion} label={current.item.name} />}
+          />
           {phase === 'rest' && (
             <div className="rest">
               <svg viewBox="0 0 100 100" className="rest__ring">

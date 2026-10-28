@@ -512,3 +512,30 @@ p { margin: 0; }
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .sheet-backdrop, .sheet { animation: none; } }
+
+/* generated artwork */
+.art { display: block; width: 100%; height: 100%; object-fit: cover; }
+.stage .art { aspect-ratio: 4 / 3; height: auto; }
+.drill__art .art { object-position: 50% 30%; }
+
+.onboarding__hero { position: relative; height: min(56vh, 460px); margin: calc(-24px - env(safe-area-inset-top)) -16px 0; border-radius: 0 0 32px 32px; border: 0; }
+.onboarding__hero .art { object-position: 50% 2%; }
+.onboarding__hero .motion { height: 100%; }
+.onboarding__hero::after { content: ''; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
+.onboarding__hero + .eyebrow { position: relative; margin-top: -54px; }
+
+.role-card { padding: 0 0 16px; overflow: hidden; }
+.role-card > :not(.role-card__art) { margin-left: 16px; margin-right: 16px; }
+.role-card__icon { margin-top: 16px; }
+.role-card__art { aspect-ratio: 1; height: auto; object-position: 50% 15%; margin-bottom: 6px; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+
+.track__cover { height: auto; aspect-ratio: 5 / 2; margin: -16px -16px 0; width: calc(100% + 32px); border-radius: var(--radius) var(--radius) 0 0; object-position: 50% 45%; -webkit-mask-image: linear-gradient(#000 65%, transparent); mask-image: linear-gradient(#000 65%, transparent); }
+.track__block--locked .track__cover { filter: grayscale(1) brightness(0.6); }
+
+.today--art { padding-top: 132px; }
+.today__art { position: absolute; inset: 0 0 auto; height: 200px; background: center 40% / cover no-repeat; -webkit-mask-image: linear-gradient(#000 40%, transparent); mask-image: linear-gradient(#000 40%, transparent); opacity: 0.9; pointer-events: none; }
+.today--art::after { display: none; }
+.today > :not(.today__art) { position: relative; }
+.empty--art { padding-top: 0; overflow: hidden; border-style: solid; border-color: var(--line); background: var(--surface); }
+.empty__art { aspect-ratio: 2 / 1; height: auto; margin-bottom: 8px; -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+.empty--art > :not(.empty__art) { margin-left: 16px; margin-right: 16px; }

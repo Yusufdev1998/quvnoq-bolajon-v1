@@ -4,6 +4,7 @@ import type { AthleteContext } from '../../core/store.ts';
 import { BLOCKS, exercisesOfBlock } from '../../domain/catalog.ts';
 import { prescribe } from '../../domain/load.ts';
 import { MASTERY } from '../../domain/progression.ts';
+import { Artwork } from '../../ui/art.tsx';
 import { IntensityBars, Meter, PageHeader, Pill } from '../../ui/kit.tsx';
 
 const STATE_LABEL = { locked: 'Yopiq', active: 'Joriy', mastered: 'O‘zlashtirildi' };
@@ -27,6 +28,7 @@ export function TrainingPage({ ctx }: { ctx: AthleteContext }) {
                 <span className="track__dot">{p.state === 'mastered' ? <Check size={16} strokeWidth={3} /> : locked ? <Lock size={14} /> : b.id}</span>
               </div>
               <div className="track__body">
+                <Artwork name={`block-${b.id}`} alt={`${b.id}-blok: ${b.name}`} className="track__cover" />
                 <div className="track__head">
                   <div>
                     <p className="eyebrow">{b.id}-blok</p>

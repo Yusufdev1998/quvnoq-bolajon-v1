@@ -111,7 +111,7 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
 
       <SectionTitle>Mashg‘ulotlar jurnali</SectionTitle>
       {ctx.sessions.length === 0 ? (
-        <Empty icon={<Footprints />} title="Hali mashg‘ulot yo‘q">
+        <Empty icon={<Footprints />} art="empty-sessions" title="Hali mashg‘ulot yo‘q">
           Birinchi mashg‘ulot saqlangach, jurnal shu yerda paydo bo‘ladi.
         </Empty>
       ) : (

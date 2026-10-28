@@ -4,6 +4,7 @@ import type { AthleteContext } from '../../core/store.ts';
 import { blockInfo, drillById, exerciseById, GAME_ELEMENTS, INTENSITY_LABEL } from '../../domain/catalog.ts';
 import { prescribe } from '../../domain/load.ts';
 import { AthleteMotion } from '../../ui/AthleteMotion.tsx';
+import { Artwork } from '../../ui/art.tsx';
 import { Card, Empty, PageHeader, Pill } from '../../ui/kit.tsx';
 
 export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: string; ctx: AthleteContext }) {
@@ -30,7 +31,7 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
       <PageHeader eyebrow={exercise ? `${exercise.block}-blok · ${block.name}` : GAME_ELEMENTS.find((e) => e.id === drill!.element)?.name} title={item.name} back={back} />
 
       <div className="stage" style={{ '--block': block.color } as React.CSSProperties}>
-        <AthleteMotion motion={item.motion} label={item.name} />
+        <Artwork name={`${exercise ? 'ex' : 'drill'}-${item.id}`} alt={item.name} fallback={<AthleteMotion motion={item.motion} label={item.name} />} />
       </div>
 
       <p className="lead">{item.summary}</p>
