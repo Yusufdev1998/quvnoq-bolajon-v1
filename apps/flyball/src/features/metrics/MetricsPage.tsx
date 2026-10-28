@@ -4,6 +4,7 @@ import { formatDate, toISODate } from '../../core/dates.ts';
 import { dispatch, newId, type AthleteContext } from '../../core/store.ts';
 import { ageOf, bmi, formatValue, jumpNorm, METRIC_GROUPS, METRICS, rateVerticalJump, RATING_LABEL, rufierRating, validateValue, type Rating } from '../../domain/metrics.ts';
 import type { MetricKey, MetricValues } from '../../domain/types.ts';
+import { confirmAction } from '../../ui/confirm.tsx';
 import { Card, PageHeader, Pill, SectionTitle } from '../../ui/kit.tsx';
 import { POSITION_LABEL } from '../team/AthleteForm.tsx';
 
@@ -124,7 +125,7 @@ export function MetricsPage({ ctx }: { ctx: AthleteContext }) {
                     .join(' · ')}
                 </span>
               </div>
-              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={() => window.confirm('O‘lchovni o‘chirasizmi?') && dispatch({ type: 'removeMetrics', id: e.id })}>
+              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={async () => (await confirmAction({ title: 'O‘lchovni o‘chirasizmi?', text: `${formatDate(e.date)} sanadagi barcha qiymatlar o‘chiriladi.`, confirmLabel: 'O‘chirish', danger: true })) && dispatch({ type: 'removeMetrics', id: e.id })}>
                 <Trash2 size={17} />
               </button>
             </li>

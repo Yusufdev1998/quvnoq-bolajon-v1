@@ -101,6 +101,12 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
         ))}
       </ul>
 
+      {exercise && !locked && (
+        <a className="btn btn--primary btn--block" href={href({ name: 'run-plyo', block: exercise.block })}>
+          <Play size={18} fill="currentColor" /> {exercise.block}-blok mashg‘ulotini boshlash
+        </a>
+      )}
+
       {drill && !locked && (
         <a className="btn btn--primary btn--block" href={href({ name: 'run-game', element: drill.element })}>
           <Play size={18} fill="currentColor" /> O‘yin mashg‘ulotini boshlash

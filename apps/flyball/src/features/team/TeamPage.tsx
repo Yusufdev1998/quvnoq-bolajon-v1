@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { navigate } from '../../app/router.ts';
 import { dispatch, useAppState } from '../../core/store.ts';
 import type { Role } from '../../domain/types.ts';
+import { confirmAction } from '../../ui/confirm.tsx';
 import { Card, PageHeader, Segmented, SectionTitle } from '../../ui/kit.tsx';
 import { AthleteForm, POSITION_LABEL } from './AthleteForm.tsx';
 
@@ -96,7 +97,10 @@ export function TeamPage() {
                 <button
                   className="icon-btn icon-btn--quiet"
                   aria-label="O‘chirish"
-                  onClick={() => window.confirm(`${a.name} va uning barcha ma’lumotlari o‘chirilsinmi?`) && dispatch({ type: 'removeAthlete', id: a.id })}
+                  onClick={async () =>
+                    (await confirmAction({ title: `${a.name}ni o‘chirasizmi?`, text: 'Uning barcha o‘lchovlari va mashg‘ulotlari ham o‘chiriladi.', confirmLabel: 'O‘chirish', danger: true })) &&
+                    dispatch({ type: 'removeAthlete', id: a.id })
+                  }
                 >
                   <Trash2 size={17} />
                 </button>
@@ -111,7 +115,10 @@ export function TeamPage() {
         <p className="muted small">Barcha ma’lumotlar faqat shu qurilmada saqlanadi. Ro‘yxatdan o‘tish, server yoki tashqi uzatish yo‘q.</p>
         <button
           className="btn btn--danger"
-          onClick={() => window.confirm('Barcha sportchilar, o‘lchovlar va mashg‘ulotlar o‘chiriladi. Davom etasizmi?') && dispatch({ type: 'reset' })}
+          onClick={async () =>
+            (await confirmAction({ title: 'Hammasini tozalaysizmi?', text: 'Barcha sportchilar, o‘lchovlar va mashg‘ulotlar qurilmadan o‘chiriladi. Buni qaytarib bo‘lmaydi.', confirmLabel: 'Tozalash', danger: true })) &&
+            dispatch({ type: 'reset' })
+          }
         >
           <RotateCcw size={16} /> Hammasini tozalash
         </button>

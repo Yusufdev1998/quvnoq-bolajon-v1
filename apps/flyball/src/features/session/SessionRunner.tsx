@@ -7,6 +7,7 @@ import { blockInfo, exercisesOfBlock, GAME_DRILLS, GAME_ELEMENTS } from '../../d
 import { estimateMinutes, planWorkout, type PlannedItem } from '../../domain/load.ts';
 import type { Dosable, Exercise, GameDrill, Motion } from '../../domain/types.ts';
 import { AthleteMotion } from '../../ui/AthleteMotion.tsx';
+import { confirmAction } from '../../ui/confirm.tsx';
 import { Empty } from '../../ui/kit.tsx';
 
 type RunRoute = Extract<Route, { name: 'run-plyo' | 'run-game' }>;
@@ -49,8 +50,11 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
     if (phase === 'rest' && remaining === 0) setPhase('work');
   }, [phase, remaining]);
 
-  const exit = () => {
-    if (phase === 'preview' || window.confirm('Mashg‘ulotni saqlamasdan chiqasizmi?')) history.length > 1 ? history.back() : navigate({ name: 'home' });
+  const exit = async () => {
+    const leave =
+      phase === 'preview' ||
+      (await confirmAction({ title: 'Mashg‘ulotdan chiqasizmi?', text: 'Bajarilgan to‘plamlar saqlanmaydi.', confirmLabel: 'Chiqish', danger: true }));
+    if (leave) navigate({ name: 'home' });
   };
 
   const header = (

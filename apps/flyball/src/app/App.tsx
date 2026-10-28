@@ -8,6 +8,7 @@ import { MonitoringPage } from '../features/monitoring/MonitoringPage.tsx';
 import { Onboarding } from '../features/onboarding/Onboarding.tsx';
 import { SessionRunner } from '../features/session/SessionRunner.tsx';
 import { TeamPage } from '../features/team/TeamPage.tsx';
+import { ConfirmHost } from '../ui/confirm.tsx';
 import { DetailPage } from '../features/training/DetailPage.tsx';
 import { TrainingPage } from '../features/training/TrainingPage.tsx';
 import { href, useRoute, type Route } from './router.ts';
@@ -35,6 +36,7 @@ export function App() {
     return (
       <div className="app app--focus">
         <SessionRunner key={href(route)} route={route} ctx={ctx} />
+        <ConfirmHost />
       </div>
     );
   }
@@ -66,6 +68,7 @@ export function App() {
           );
         })}
       </nav>
+      <ConfirmHost />
     </div>
   );
 }

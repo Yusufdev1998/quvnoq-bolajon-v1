@@ -9,6 +9,7 @@ import { metricsCsv, sessionsCsv } from '../../domain/csv.ts';
 import { metricDef, METRICS } from '../../domain/metrics.ts';
 import type { MetricKey } from '../../domain/types.ts';
 import { BarChart, LineChart } from '../../ui/charts.tsx';
+import { confirmAction } from '../../ui/confirm.tsx';
 import { AdviceList, Card, Empty, PageHeader, Pill, Segmented, SectionTitle } from '../../ui/kit.tsx';
 
 const TREND_KEYS: MetricKey[] = ['verticalJump', 'attackReach', 'longJump', 'shuttleRun', 'rufier', 'weight'];
@@ -129,7 +130,7 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
                 </span>
                 {s.note && <em>“{s.note}”</em>}
               </div>
-              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={() => window.confirm('Mashg‘ulotni jurnaldan o‘chirasizmi?') && dispatch({ type: 'removeSession', id: s.id })}>
+              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={async () => (await confirmAction({ title: 'Mashg‘ulotni o‘chirasizmi?', text: 'U jurnal, grafiklar va blok progressidan olib tashlanadi.', confirmLabel: 'O‘chirish', danger: true })) && dispatch({ type: 'removeSession', id: s.id })}>
                 <Trash2 size={16} />
               </button>
             </li>
@@ -146,7 +147,11 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
           <Download size={16} /> Ko‘rsatkichlar CSV
         </button>
       </div>
-      <p className="muted small">{METRICS.length} ta ko‘rsatkich va barcha sportchilar ma’lumoti bitta faylda.</p>
+      <p className="muted small">
+        {state.sessions.length === 0 && state.metrics.length === 0
+          ? 'Hisobot uchun avval mashg‘ulot saqlang yoki ko‘rsatkich kiriting.'
+          : `Barcha sportchilar ma’lumoti; ko‘rsatkichlar faylida ${METRICS.length} ta ustun.`}
+      </p>
     </>
   );
 }
