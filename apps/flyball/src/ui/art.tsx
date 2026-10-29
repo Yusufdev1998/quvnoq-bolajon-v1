@@ -25,6 +25,10 @@ const VIDEO_CREDITS: Record<string, { author: string; url: string; license: stri
   'ex-jump-rope': { author: 'Pexels', url: 'https://www.pexels.com/video/5272784/', license: 'Pexels License' },
   'ex-hurdle-hops': { author: 'Pexels', url: 'https://www.pexels.com/video/36205142/', license: 'Pexels License' },
   'ex-approach-jump': { author: 'Pexels', url: 'https://www.pexels.com/video/6216857/', license: 'Pexels License' },
+  'drill-approach-attack': { author: 'Pexels', url: 'https://www.pexels.com/video/6216849/', license: 'Pexels License' },
+  'drill-static-block': { author: 'Pexels', url: 'https://www.pexels.com/video/6179958/', license: 'Pexels License' },
+  'drill-set-jump': { author: 'Pexels', url: 'https://www.pexels.com/video/6217342/', license: 'Pexels License' },
+  'drill-dig-hops': { author: 'Pexels', url: 'https://www.pexels.com/video/6217342/', license: 'Pexels License' },
 };
 
 /** Source line under a movement clip; renders nothing when the clip is missing or needs no credit. */

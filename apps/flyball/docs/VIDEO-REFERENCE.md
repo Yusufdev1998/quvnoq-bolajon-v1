@@ -44,6 +44,17 @@ Free to use in apps, no attribution required; the app still shows "Video: Pexels
 | `ex-hurdle-hops.mp4` | [pexels.com/video/36205142](https://www.pexels.com/video/36205142/) | 0.75 + 3.0 s | 720:540:0:430 | Two-foot hops over mini hurdles; the camera follows him |
 | `ex-approach-jump.mp4` | [pexels.com/video/6216857](https://www.pexels.com/video/6216857/) | 4.0 + 4.0 s | 960:720:160:0 | Volleyball approach steps and take-off; slight pan |
 
+### Game drills (Pexels)
+
+| File | Source video | Start + length | Crop (w:h:x:y) | Notes |
+| --- | --- | --- | --- | --- |
+| `drill-approach-attack.mp4` | [pexels.com/video/6216849](https://www.pexels.com/video/6216849/) | 6.3 + 2.5 s | 960:720:160:0 | Girl's approach run, jump and spike in a school gym; slight pan |
+| `drill-static-block.mp4` | [pexels.com/video/6179958](https://www.pexels.com/video/6179958/) | 0.3 + 2.6 s | 960:720:200:0 | Close-up: two hands over the tape block the ball (beach net) |
+| `drill-set-jump.mp4` | [pexels.com/video/6217342](https://www.pexels.com/video/6217342/) | 1.5 + 3.5 s | 720:540:0:130 | Overhead set, waist up; **close, not exact:** she sets standing, without the jump |
+| `drill-dig-hops.mp4` | [pexels.com/video/6217342](https://www.pexels.com/video/6217342/) | 10.0 + 4.0 s | 720:540:0:560 | Same girl, forearm pass; the lateral hops before it are not shown |
+
+No clean clip for `drill-tuck-serve` (every jump serve on Pexels has a moving or zooming camera), `drill-depth-attack`, `drill-double-attack`, `drill-shuffle-block` or `drill-triple-block`; those keep the animated figure.
+
 **Source order:** Redefining Strength clips stay as they are. For everything else, Pexels or Pixabay comes first, and YouTube CC BY only where no stock clip shows the movement correctly. Checked on 2026-10-29: Pexels and Pixabay had no usable single-leg hop, depth jump, medicine ball jump throw or pogo hop (only burpees, bench step-overs, close-ups, slams, group dancing or a 3D cartoon), so those stay on YouTube CC.
 
 Download a Pexels file at a small size with `https://www.pexels.com/download/video/<id>/?h=720&w=1280` (or `h=1280&w=720` for portrait).
