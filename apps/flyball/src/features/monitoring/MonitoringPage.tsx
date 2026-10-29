@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { formatDate } from '../../core/dates.ts';
 import { exportCsv } from '../../core/exportFile.ts';
 import { deriveAthlete, dispatch, useAppState, type AthleteContext } from '../../core/store.ts';
-import { metricSeries, sessionContacts, sessionLoad, trend, weeklyBuckets, ZONE_LABEL, type AcwrZone } from '../../domain/analytics.ts';
+import { ACWR_MIN_HISTORY_DAYS, metricSeries, sessionContacts, sessionLoad, trend, weeklyBuckets, ZONE_LABEL, type AcwrZone } from '../../domain/analytics.ts';
 import { blockInfo, drillById, exerciseById } from '../../domain/catalog.ts';
 import { metricsCsv, sessionsCsv } from '../../domain/csv.ts';
 import { metricDef, METRICS } from '../../domain/metrics.ts';
@@ -54,6 +54,7 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
         </div>
         <p className="muted small">
           Oxirgi 7 kun: {Math.round(ctx.load.acute)} AU · 4 haftalik o‘rtacha: {Math.round(ctx.load.chronic)} AU. Optimal zona 0.8–1.3.
+          {ratio == null && ctx.sessions.length > 0 && ` Nisbat ${ACWR_MIN_HISTORY_DAYS / 7} haftalik mashg‘ulot tarixidan keyin hisoblanadi.`}
         </p>
       </Card>
 

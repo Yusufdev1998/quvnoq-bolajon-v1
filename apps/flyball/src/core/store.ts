@@ -1,5 +1,5 @@
 import { useMemo, useSyncExternalStore } from 'react';
-import { acwr, coachAdvice } from '../domain/analytics.ts';
+import { acwr, coachAdvice, restUntil } from '../domain/analytics.ts';
 import { exercisesOfBlock } from '../domain/catalog.ts';
 import { buildLoadProfile, planWorkout } from '../domain/load.ts';
 import { latestValues } from '../domain/metrics.ts';
@@ -65,6 +65,7 @@ export function deriveAthlete(s: AppState, now: Date) {
     entries,
     todayPlan: planWorkout(exercisesOfBlock(block), profile, blockSessions),
     load: acwr(s.sessions, athlete.id, now),
+    restUntil: restUntil(s.sessions, athlete.id, now),
     advice: coachAdvice({ sessions: s.sessions, entries: s.metrics, athleteId: athlete.id, progress, now }),
   };
 }

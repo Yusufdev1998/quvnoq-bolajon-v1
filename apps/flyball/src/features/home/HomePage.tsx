@@ -1,8 +1,8 @@
 import { ArrowUpRight, Play, ShieldCheck } from 'lucide-react';
 import { href } from '../../app/router.ts';
-import { formatLongDate, startOfWeek, toISODate } from '../../core/dates.ts';
+import { formatDate, formatLongDate, startOfWeek, toISODate } from '../../core/dates.ts';
 import type { AthleteContext } from '../../core/store.ts';
-import { metricSeries, sessionContacts, trend, ZONE_LABEL } from '../../domain/analytics.ts';
+import { metricSeries, MIN_REST_DAYS, sessionContacts, trend, ZONE_LABEL } from '../../domain/analytics.ts';
 import { blockInfo } from '../../domain/catalog.ts';
 import { estimateMinutes } from '../../domain/load.ts';
 import { artFocus, artUrl } from '../../ui/art.tsx';
@@ -36,7 +36,13 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
           <span className="today__badge">{ctx.block}-blok</span>
           <span className="today__name">{info.name}</span>
         </div>
-        <h2 className="today__title">Bugungi mashg‘ulot</h2>
+        <h2 className="today__title">{ctx.restUntil ? 'Bugun dam olish kuni' : 'Bugungi mashg‘ulot'}</h2>
+        {ctx.restUntil && (
+          <p className="today__note">
+            Plyometrik mashg‘ulotlar orasida {MIN_REST_DAYS * 24} soat dam kerak: paylar va mushaklar tiklanadi. Keyingi mashg‘ulot{' '}
+            {formatDate(toISODate(ctx.restUntil))} kuni.
+          </p>
+        )}
         <div className="today__numbers">
           <div>
             <strong>{ctx.todayPlan.length}</strong>
@@ -61,8 +67,9 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
             </li>
           ))}
         </ol>
-        <a className="btn btn--primary btn--block" href={href({ name: 'run-plyo' })}>
-          <Play size={18} fill="currentColor" /> Mashg‘ulotni boshlash
+        {/* The coach can still overrule the rest day, but it is no longer the obvious action. */}
+        <a className={`btn ${ctx.restUntil ? 'btn--ghost' : 'btn--primary'} btn--block`} href={href({ name: 'run-plyo' })}>
+          <Play size={18} fill="currentColor" /> {ctx.restUntil ? 'Baribir boshlash' : 'Mashg‘ulotni boshlash'}
         </a>
       </section>
 
@@ -73,7 +80,7 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
             value={ctx.values.verticalJump ?? '—'}
             unit={ctx.values.verticalJump != null ? 'sm' : undefined}
             tone={jumpTrend?.improving ? 'good' : undefined}
-            sub={jumpTrend ? `${jumpTrend.delta > 0 ? '+' : ''}${jumpTrend.delta} sm boshidan` : 'Test kiritilmagan'}
+            sub={jumpTrend ? `${jumpTrend.delta > 0 ? '+' : ''}${jumpTrend.delta} sm boshidan` : jump.length > 0 ? 'Birinchi o‘lchov' : 'Test kiritilmagan'}
           />
         </Card>
         <Card>

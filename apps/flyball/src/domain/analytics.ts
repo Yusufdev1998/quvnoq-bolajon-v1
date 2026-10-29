@@ -38,22 +38,38 @@ export interface Acwr {
   zone: AcwrZone;
 }
 
+/** Days of training history before the ratio means anything; earlier, one session looks like a 4× spike. */
+export const ACWR_MIN_HISTORY_DAYS = 21;
+
 /** Acute:chronic workload ratio — last 7 days against the weekly average of the last 28. */
 export function acwr(sessions: Session[], athleteId: string, now: Date): Acwr {
   let acute = 0;
   let total = 0;
+  let history = 0;
   for (const s of sessions) {
     if (s.athleteId !== athleteId) continue;
     const ago = daysBetween(parseISODate(s.date), now);
+    history = Math.max(history, ago);
     if (ago < 0 || ago >= 28) continue;
     total += sessionLoad(s);
     if (ago < 7) acute += sessionLoad(s);
   }
   const chronic = total / 4;
-  if (chronic === 0) return { acute, chronic, ratio: null, zone: 'nomalum' };
+  if (chronic === 0 || history < ACWR_MIN_HISTORY_DAYS) return { acute, chronic, ratio: null, zone: 'nomalum' };
   const ratio = Math.round((acute / chronic) * 100) / 100;
   const zone: AcwrZone = ratio < 0.8 ? 'kam' : ratio <= 1.3 ? 'optimal' : ratio <= 1.5 ? 'yuqori' : 'xavfli';
   return { acute, chronic, ratio, zone };
+}
+
+/** Plyometric sessions need about 48 h between them for tendons and muscles to recover. */
+export const MIN_REST_DAYS = 2;
+
+/** The date the athlete can train again, or null when today is fine. Game drills count: they are jumps too. */
+export function restUntil(sessions: Session[], athleteId: string, now: Date): Date | null {
+  const last = sessions.filter((s) => s.athleteId === athleteId).reduce<string | null>((max, s) => (max == null || s.date > max ? s.date : max), null);
+  if (last == null) return null;
+  const until = addDays(parseISODate(last), MIN_REST_DAYS);
+  return daysBetween(now, until) > 0 ? until : null;
 }
 
 export const ZONE_LABEL: Record<AcwrZone, string> = {

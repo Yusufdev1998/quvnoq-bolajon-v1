@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { parseHash, href } from '../src/app/router.ts';
 import { reducer, initialState } from '../src/core/reducer.ts';
-import { acwr, coachAdvice, trend, weeklyBuckets } from '../src/domain/analytics.ts';
+import { acwr, coachAdvice, restUntil, trend, weeklyBuckets } from '../src/domain/analytics.ts';
 import { BLOCKS, EXERCISES, GAME_DRILLS, exercisesOfBlock } from '../src/domain/catalog.ts';
 import { metricsCsv } from '../src/domain/csv.ts';
 import { buildLoadProfile, planWorkout, prescribe } from '../src/domain/load.ts';
@@ -103,6 +103,20 @@ test('analytics: ACWR zones', () => {
   const r = acwr(spike, 'a', now);
   assert.equal(r.zone, 'xavfli');
   assert.ok(coachAdvice({ sessions: spike, entries: [], athleteId: 'a', progress: blockProgress(spike, 'a'), now }).some((a) => a.id === 'acwr-high'));
+});
+
+test('analytics: a new athlete gets no ACWR zone or spike warning', () => {
+  const fresh = [session('2026-10-20', 1), session('2026-10-27', 1, 4, 9, 90)];
+  assert.equal(acwr(fresh, 'a', now).zone, 'nomalum');
+  assert.equal(acwr(fresh, 'a', now).ratio, null);
+  assert.ok(!coachAdvice({ sessions: fresh, entries: [], athleteId: 'a', progress: blockProgress(fresh, 'a'), now }).some((a) => a.id === 'acwr-high'));
+});
+
+test('analytics: 48 h rest between plyometric sessions', () => {
+  assert.equal(restUntil([], 'a', now), null);
+  assert.equal(restUntil([session('2026-10-28', 1)], 'a', now)?.getDate(), 30);
+  assert.equal(restUntil([session('2026-10-27', null)], 'a', now)?.getDate(), 29);
+  assert.equal(restUntil([session('2026-10-26', 1)], 'a', now), null);
 });
 
 test('analytics: weekly buckets and trends', () => {

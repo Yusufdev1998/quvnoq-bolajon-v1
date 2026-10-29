@@ -166,6 +166,7 @@ p { margin: 0; }
 .today__badge { padding: 4px 10px; border-radius: 8px; background: var(--block); color: var(--accent-ink); font: 800 14px/1 var(--display); text-transform: uppercase; letter-spacing: 0.06em; }
 .today__name { font-weight: 600; font-size: 14px; color: var(--block); }
 .today__title { font-size: 30px; text-transform: uppercase; }
+.today__note { margin: 0; font-size: 14px; color: var(--muted); }
 .today__numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .today__numbers div { display: flex; flex-direction: column; padding: 10px 12px; border-radius: 14px; background: rgba(10, 15, 30, 0.45); }
 .today__numbers strong { font: 800 30px/1 var(--display); }
