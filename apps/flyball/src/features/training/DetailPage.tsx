@@ -4,7 +4,7 @@ import type { AthleteContext } from '../../core/store.ts';
 import { blockInfo, drillById, exerciseById, GAME_ELEMENTS, INTENSITY_LABEL } from '../../domain/catalog.ts';
 import { prescribe } from '../../domain/load.ts';
 import { AthleteMotion } from '../../ui/AthleteMotion.tsx';
-import { Artwork } from '../../ui/art.tsx';
+import { Artwork, VideoCredit } from '../../ui/art.tsx';
 import { Card, Empty, PageHeader, Pill } from '../../ui/kit.tsx';
 
 export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: string; ctx: AthleteContext }) {
@@ -33,6 +33,7 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
       <div className="stage" style={{ '--block': block.color } as React.CSSProperties}>
         <Artwork name={`${exercise ? 'ex' : 'drill'}-${item.id}`} alt={item.name} fallback={<AthleteMotion motion={item.motion} label={item.name} />} />
       </div>
+      <VideoCredit name={`${exercise ? 'ex' : 'drill'}-${item.id}`} />
 
       <p className="lead">{item.summary}</p>
 

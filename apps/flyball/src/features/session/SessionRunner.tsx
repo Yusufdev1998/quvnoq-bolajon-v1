@@ -7,7 +7,7 @@ import { blockInfo, exercisesOfBlock, GAME_DRILLS, GAME_ELEMENTS } from '../../d
 import { estimateMinutes, planWorkout, type PlannedItem } from '../../domain/load.ts';
 import type { Dosable, Exercise, GameDrill, Motion } from '../../domain/types.ts';
 import { AthleteMotion } from '../../ui/AthleteMotion.tsx';
-import { Artwork } from '../../ui/art.tsx';
+import { Artwork, VideoCredit } from '../../ui/art.tsx';
 import { confirmAction } from '../../ui/confirm.tsx';
 import { Empty } from '../../ui/kit.tsx';
 
@@ -200,6 +200,7 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
             </div>
           )}
         </div>
+        <VideoCredit name={`${setup.kind === 'plyo' ? 'ex' : 'drill'}-${current.item.id}`} />
         <p className="eyebrow">{phase === 'rest' ? 'Keyingisi' : `To‘plam ${set} / ${current.sets}`}</p>
         <h1 className="runner__h1">{current.item.name}</h1>
         <div className="reps">

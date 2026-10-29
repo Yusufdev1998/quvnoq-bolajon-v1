@@ -20,6 +20,38 @@ To recut one (ffmpeg): `ffmpeg -ss <start> -t <length> -i <video> -an -vf "crop=
 
 `ex-broad-jump` was skipped: in "Forward Hops" she hops out of frame.
 
+## Creative Commons clips (YouTube, CC BY)
+
+Licensed **Creative Commons Attribution** (checked in each video's metadata on 2026-10-29). Reuse is allowed as long as the creator is credited: the app shows "Video: <author> · CC BY" with a link under the clip (`VIDEO_CREDITS` in `src/ui/art.tsx`). Keep that credit if a clip moves.
+
+| File | Source video | Creator | Start + length | Crop (w:h:x:y) | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `ex-single-hop.mp4` | [Single Leg Forward-Backward Hops](https://youtu.be/hKhx9HOlWOk) | Lance Goyke | 1.008 + 2.687 s | 960:720:160:0 | Side view, one leg |
+| `ex-depth-vertical.mp4` | [depth jump](https://youtu.be/dIgxJ9mgR28) | Melissa Witmer | 0.9 + 1.9 s | 760:570:260:100 | Off the box, max reach at a Vertec; loop jumps back to the box |
+| `ex-medball-jump.mp4` | [Medicine Ball Power Jumps](https://youtu.be/bYk0bRfUeBU) | Coach Bobby Bluford | 5.333 + 3.334 s | 640:480:90:0 | **Close, not exact:** jumps holding the ball overhead, no throw |
+| `ex-ankle-hops.mp4` | [Pogo jumps](https://youtu.be/hP0O3gz_dlQ) | 2sport4life | 0.8 + 4.0 s | 960:720:20:0 | Busy gym background |
+
+`ex-depth-jump-low.mp4` is a copy of `ex-depth-vertical.mp4` (same drop-and-rebound movement, same credit).
+
+## Pexels clips (Pexels License)
+
+Free to use in apps, no attribution required; the app still shows "Video: Pexels" with a link.
+
+| File | Source video | Start + length | Crop (w:h:x:y) | Notes |
+| --- | --- | --- | --- | --- |
+| `ex-tuck-jump.mp4` | [pexels.com/video/6156132](https://www.pexels.com/video/6156132/) | 3.9 + 3.2 s | 960:720:160:0 | One tuck jump in slow motion, knees fully to the chest; replaced the YouTube CC clip (Steve Eckert) |
+| `ex-jump-rope.mp4` | [pexels.com/video/5272784](https://www.pexels.com/video/5272784/) | 2.544 + 2.544 s | 960:720:120:0 | Young girl, front view, fixed camera |
+| `ex-hurdle-hops.mp4` | [pexels.com/video/36205142](https://www.pexels.com/video/36205142/) | 0.75 + 3.0 s | 720:540:0:430 | Two-foot hops over mini hurdles; the camera follows him |
+| `ex-approach-jump.mp4` | [pexels.com/video/6216857](https://www.pexels.com/video/6216857/) | 4.0 + 4.0 s | 960:720:160:0 | Volleyball approach steps and take-off; slight pan |
+
+**Source order:** Redefining Strength clips stay as they are. For everything else, Pexels or Pixabay comes first, and YouTube CC BY only where no stock clip shows the movement correctly. Checked on 2026-10-29: Pexels and Pixabay had no usable single-leg hop, depth jump, medicine ball jump throw or pogo hop (only burpees, bench step-overs, close-ups, slams, group dancing or a 3D cartoon), so those stay on YouTube CC.
+
+Download a Pexels file at a small size with `https://www.pexels.com/download/video/<id>/?h=720&w=1280` (or `h=1280&w=720` for portrait).
+
+Still without a clip (nothing usable found on YouTube CC or Pexels): `ex-landing`, `ex-line-hops`, `ex-broad-jump`, `ex-lateral-box`, `ex-reactive-drop`, `ex-bounds`. Pexels has plenty of volleyball spike, serve and block footage for the drills and game elements.
+
+Checked and rejected: Endless Reference tuck (jump off a truck, split screen), WABBA and Bootcamp Ideas tuck (low jumps / blurry, head cut), THP broad jump and bounds (burned-in caption, runs out of frame), AmericanParkour (camera cuts), 2R7Gc line hops (movement unclear), ExperienceLife lateral jump (a skater, with text), The Body Guide lateral box (vertical video with caption over the box), OVR depth / hurdle (vertical, talking, overlays), Professional Seminars (talking head), Dead Ball Slams (a slam, not a jump throw), informedinsport bounds and Ace Jumper volleyball (far away, moving camera or match footage), Jump Rope Dudes (rope only after on-screen counters). Unavailable: `tf7YG9xwscA`, `OCWEypnPwGc`, `r_Oe8mj7Y88`.
+
 ## The 23 moves and their Flyball match
 
 ✅ same movement · ≈ related, useful for parts of it · — no Flyball equivalent

@@ -7,6 +7,37 @@ const byName = (files: Record<string, string>) => new Map(Object.entries(files).
 const images = byName(import.meta.glob<string>(['../assets/images/block-*.webp', '../assets/images/element-*.webp', '../assets/images/onboarding-*.webp', '../assets/images/empty-*.webp'], { eager: true, query: '?url', import: 'default' }));
 const videos = byName(import.meta.glob<string>(['../assets/videos/block-*.mp4', '../assets/videos/element-*.mp4', '../assets/videos/onboarding-*.mp4', '../assets/videos/empty-*.mp4', '../assets/videos/ex-*.mp4', '../assets/videos/drill-*.mp4'], { eager: true, query: '?url', import: 'default' }));
 
+// Who filmed each movement clip. CC BY clips must keep this credit wherever they are shown.
+const CC_BY = 'CC BY';
+const VIDEO_CREDITS: Record<string, { author: string; url: string; license: string }> = {
+  'ex-box-jump': { author: 'Redefining Strength', url: 'https://redefiningstrength.com', license: '©' },
+  'ex-split-jump': { author: 'Redefining Strength', url: 'https://redefiningstrength.com', license: '©' },
+  'ex-squat-jump': { author: 'Redefining Strength', url: 'https://redefiningstrength.com', license: '©' },
+  'ex-rotation-jump': { author: 'Redefining Strength', url: 'https://redefiningstrength.com', license: '©' },
+  'ex-skater': { author: 'Redefining Strength', url: 'https://redefiningstrength.com', license: '©' },
+  'ex-tuck-jump': { author: 'Pexels', url: 'https://www.pexels.com/video/6156132/', license: 'Pexels License' },
+  'ex-single-hop': { author: 'Lance Goyke', url: 'https://youtu.be/hKhx9HOlWOk', license: CC_BY },
+  'ex-depth-vertical': { author: 'Melissa Witmer', url: 'https://youtu.be/dIgxJ9mgR28', license: CC_BY },
+  'ex-medball-jump': { author: 'Coach Bobby Bluford', url: 'https://youtu.be/bYk0bRfUeBU', license: CC_BY },
+  'ex-ankle-hops': { author: '2sport4life', url: 'https://youtu.be/hP0O3gz_dlQ', license: CC_BY },
+  // Same clip as ex-depth-vertical: the drop and rebound are the movement being taught.
+  'ex-depth-jump-low': { author: 'Melissa Witmer', url: 'https://youtu.be/dIgxJ9mgR28', license: CC_BY },
+  'ex-jump-rope': { author: 'Pexels', url: 'https://www.pexels.com/video/5272784/', license: 'Pexels License' },
+  'ex-hurdle-hops': { author: 'Pexels', url: 'https://www.pexels.com/video/36205142/', license: 'Pexels License' },
+  'ex-approach-jump': { author: 'Pexels', url: 'https://www.pexels.com/video/6216857/', license: 'Pexels License' },
+};
+
+/** Source line under a movement clip; renders nothing when the clip is missing or needs no credit. */
+export function VideoCredit({ name }: { name: string }) {
+  const credit = VIDEO_CREDITS[name];
+  if (!credit || !videos.has(name)) return null;
+  return (
+    <p className="credit">
+      Video: <a href={credit.url} target="_blank" rel="noreferrer">{credit.author}</a> · {credit.license}
+    </p>
+  );
+}
+
 // Where to keep the subject when an image is cropped by object-fit / background-size: cover.
 const FOCUS: Record<string, string> = { 'block-3': '50% 30%', 'block-4': '50% 0%' };
 
