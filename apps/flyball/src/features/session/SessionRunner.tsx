@@ -182,6 +182,7 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
       <div className="runner__body">
         <div className="stage stage--runner" style={{ '--block': setup.color } as React.CSSProperties}>
           <Artwork
+            key={current.item.id}
             name={`${setup.kind === 'plyo' ? 'ex' : 'drill'}-${current.item.id}`}
             alt={current.item.name}
             fallback={<AthleteMotion motion={current.item.motion} label={current.item.name} />}

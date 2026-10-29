@@ -21,6 +21,7 @@ export function GamePage({ ctx }: { ctx: AthleteContext }) {
       <p className="lead">Plyometrik mashqlar voleybol harakatlari bilan birlashtirilgan: texnik-taktik tayyorgarlik sakrash kuchi bilan birga o‘sadi.</p>
 
       <Segmented options={GAME_ELEMENTS.map((e) => ({ id: e.id, label: e.name }))} value={element} onChange={setElement} />
+      <Artwork key={element} name={`element-${element}`} alt={info.name} className="element-cover" />
       <p className="muted element-desc">{info.description}</p>
 
       <div className="drills">

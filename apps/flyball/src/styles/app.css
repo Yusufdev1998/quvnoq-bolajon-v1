@@ -524,11 +524,6 @@ p { margin: 0; }
 .onboarding__hero::after { content: ''; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
 .onboarding__hero + .eyebrow { position: relative; margin-top: -54px; }
 
-.role-card { padding: 0 0 16px; overflow: hidden; }
-.role-card > :not(.role-card__art) { margin-left: 16px; margin-right: 16px; }
-.role-card__icon { margin-top: 16px; }
-.role-card__art { aspect-ratio: 1; height: auto; object-position: 50% 15%; margin-bottom: 6px; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
-
 .track__cover { height: auto; aspect-ratio: 5 / 2; margin: -16px -16px 0; width: calc(100% + 32px); border-radius: var(--radius) var(--radius) 0 0; object-position: 50% 45%; -webkit-mask-image: linear-gradient(#000 65%, transparent); mask-image: linear-gradient(#000 65%, transparent); }
 .track__block--locked .track__cover { filter: grayscale(1) brightness(0.6); }
 
@@ -539,3 +534,4 @@ p { margin: 0; }
 .empty--art { padding-top: 0; overflow: hidden; border-style: solid; border-color: var(--line); background: var(--surface); }
 .empty__art { aspect-ratio: 2 / 1; height: auto; margin-bottom: 8px; -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
 .empty--art > :not(.empty__art) { margin-left: 16px; margin-right: 16px; }
+.element-cover { height: auto; aspect-ratio: 2 / 1; border-radius: var(--radius); object-position: 50% 30%; border: 1px solid var(--line); }
