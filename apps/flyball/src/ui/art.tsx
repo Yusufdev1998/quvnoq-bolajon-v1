@@ -29,6 +29,19 @@ const VIDEO_CREDITS: Record<string, { author: string; url: string; license: stri
   'drill-static-block': { author: 'Pexels', url: 'https://www.pexels.com/video/6179958/', license: 'Pexels License' },
   'drill-set-jump': { author: 'Pexels', url: 'https://www.pexels.com/video/6217342/', license: 'Pexels License' },
   'drill-dig-hops': { author: 'Pexels', url: 'https://www.pexels.com/video/6217342/', license: 'Pexels License' },
+  // Close stand-ins until the team films these moves (docs/VIDEO-REFERENCE.md says what each one shows).
+  'ex-lateral-box': { author: 'Redefining Strength', url: 'https://redefiningstrength.com', license: '©' },
+  'ex-bounds': { author: 'Redefining Strength', url: 'https://redefiningstrength.com', license: '©' },
+  'ex-line-hops': { author: 'Change Your Body Boot Camps', url: 'https://youtu.be/2R7Gc-fOD4c', license: CC_BY },
+  'ex-broad-jump': { author: 'THP - Total Health Performance', url: 'https://youtu.be/wBZrsdbE3bI', license: CC_BY },
+  'ex-landing': { author: 'Melissa Witmer', url: 'https://youtu.be/dIgxJ9mgR28', license: CC_BY },
+  'ex-reactive-drop': { author: 'Melissa Witmer', url: 'https://youtu.be/dIgxJ9mgR28', license: CC_BY },
+  'drill-tuck-serve': { author: 'Pexels', url: 'https://www.pexels.com/video/6216961/', license: 'Pexels License' },
+  'drill-triple-block': { author: 'Pexels', url: 'https://www.pexels.com/video/6179958/', license: 'Pexels License' },
+  'drill-double-attack': { author: 'Pexels', url: 'https://www.pexels.com/video/6216849/', license: 'Pexels License' },
+  // Joined from two sources, so both creators are named.
+  'drill-depth-attack': { author: 'Melissa Witmer & Pexels', url: 'https://youtu.be/dIgxJ9mgR28', license: `${CC_BY} · Pexels License` },
+  'drill-shuffle-block': { author: 'Lance Goyke & Pexels', url: 'https://youtu.be/SEzlqzNqG_Q', license: `${CC_BY} · Pexels License` },
 };
 
 /** Source line under a movement clip; renders nothing when the clip is missing or needs no credit. */

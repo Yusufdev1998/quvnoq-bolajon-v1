@@ -53,13 +53,31 @@ Free to use in apps, no attribution required; the app still shows "Video: Pexels
 | `drill-set-jump.mp4` | [pexels.com/video/6217342](https://www.pexels.com/video/6217342/) | 1.5 + 3.5 s | 720:540:0:130 | Overhead set, waist up; **close, not exact:** she sets standing, without the jump |
 | `drill-dig-hops.mp4` | [pexels.com/video/6217342](https://www.pexels.com/video/6217342/) | 10.0 + 4.0 s | 720:540:0:560 | Same girl, forearm pass; the lateral hops before it are not shown |
 
-No clean clip for `drill-tuck-serve` (every jump serve on Pexels has a moving or zooming camera), `drill-depth-attack`, `drill-double-attack`, `drill-shuffle-block` or `drill-triple-block`; those keep the animated figure.
+### Stand-ins for the rest (close, not exact; replace with the team's own footage)
+
+Nothing online showed these moves cleanly, so every exercise and drill now has the closest clip available. Each is credited in `VIDEO_CREDITS`.
+
+| File | Source | Start + length | Crop / build | What it shows, and how it differs |
+| --- | --- | --- | --- | --- |
+| `ex-line-hops.mp4` | [Lateral Line Double Jumps](https://youtu.be/2R7Gc-fOD4c), Change Your Body Boot Camps (CC BY) | 1.0 + 4.0 s | 960:720:160:0 | Small side-to-side hops on a court line, front view; the hops are low |
+| `ex-lateral-box.mp4` | Redefining Strength, "Box Shuffle" | 0:45 + 4.0 s | 720:540:210:60 (cuts the label off) | Lateral feet-switching over a box, not a two-foot side jump onto it |
+| `ex-bounds.mp4` | Redefining Strength, "Forward Bounding Hops" | 2:41 + 3.6 s | 720:540:200:60 (cuts the label off) | Diagonal one-leg bounds toward the camera |
+| `ex-broad-jump.mp4` | [Broad Jumps](https://youtu.be/wBZrsdbE3bI), THP (CC BY) | 1.0 + 2.2 s | moving 560×420 crop that follows him, `x = 65 + 390·t`, y 110 (above the caption) | Two broad jumps, side view |
+| `ex-landing.mp4` | [depth jump](https://youtu.be/dIgxJ9mgR28), Melissa Witmer (CC BY) | 0.6 + 1.3 s | 760:570:260:100 | Steps off the box and lands; cut before her jump |
+| `ex-reactive-drop.mp4` | same as `ex-depth-vertical.mp4` | | copy | Drop and one rebound, not two |
+| `drill-tuck-serve.mp4` | [pexels.com/video/6216961](https://www.pexels.com/video/6216961/) | 0 + 3.6 s | 960:720:0:0 | A girl's standing serve from behind, not a jump serve |
+| `drill-depth-attack.mp4` | `ex-landing` + `drill-approach-attack` | | joined | Box drop, then a spike (two different athletes) |
+| `drill-double-attack.mp4` | `drill-approach-attack` + [pexels.com/video/6216857](https://www.pexels.com/video/6216857/) 4.0 + 4.0 s | | joined | Two spikes in a row (two different athletes) |
+| `drill-shuffle-block.mp4` | [Lateral Shuffle Rebound](https://youtu.be/SEzlqzNqG_Q), Lance Goyke (CC BY) 1.2 + 1.6 s + `drill-static-block` | | joined | A lateral shuffle, then the block close-up |
+| `drill-triple-block.mp4` | `drill-static-block` ×3, the middle one mirrored | | joined | Three blocks; the mirror stands in for a new spot on the net |
+
+Rebuild a joined clip with `ffmpeg -i a.mp4 -i b.mp4 -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0[v]" -map "[v]" -an -c:v libx264 -crf 26 -pix_fmt yuv420p -movflags +faststart out.mp4`.
 
 **Source order:** Redefining Strength clips stay as they are. For everything else, Pexels or Pixabay comes first, and YouTube CC BY only where no stock clip shows the movement correctly. Checked on 2026-10-29: Pexels and Pixabay had no usable single-leg hop, depth jump, medicine ball jump throw or pogo hop (only burpees, bench step-overs, close-ups, slams, group dancing or a 3D cartoon), so those stay on YouTube CC.
 
 Download a Pexels file at a small size with `https://www.pexels.com/download/video/<id>/?h=720&w=1280` (or `h=1280&w=720` for portrait).
 
-Still without a clip (nothing usable found on YouTube CC or Pexels): `ex-landing`, `ex-line-hops`, `ex-broad-jump`, `ex-lateral-box`, `ex-reactive-drop`, `ex-bounds`. Pexels has plenty of volleyball spike, serve and block footage for the drills and game elements.
+Every exercise now has a clip; the six without a clean source use the stand-ins listed under "Stand-ins for the rest".
 
 Checked and rejected: Endless Reference tuck (jump off a truck, split screen), WABBA and Bootcamp Ideas tuck (low jumps / blurry, head cut), THP broad jump and bounds (burned-in caption, runs out of frame), AmericanParkour (camera cuts), 2R7Gc line hops (movement unclear), ExperienceLife lateral jump (a skater, with text), The Body Guide lateral box (vertical video with caption over the box), OVR depth / hurdle (vertical, talking, overlays), Professional Seminars (talking head), Dead Ball Slams (a slam, not a jump throw), informedinsport bounds and Ace Jumper volleyball (far away, moving camera or match footage), Jump Rope Dudes (rope only after on-screen counters). Unavailable: `tf7YG9xwscA`, `OCWEypnPwGc`, `r_Oe8mj7Y88`.
 
