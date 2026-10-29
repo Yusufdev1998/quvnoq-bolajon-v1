@@ -50,7 +50,7 @@ export function VideoCredit({ name }: { name: string }) {
   if (!credit || !videos.has(name)) return null;
   return (
     <p className="credit">
-      Video: <a href={credit.url} target="_blank" rel="noreferrer">{credit.author}</a> · {credit.license}
+      Video manbasi: <a href={credit.url} target="_blank" rel="noreferrer">{credit.author}</a> · {credit.license}
     </p>
   );
 }

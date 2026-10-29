@@ -18,7 +18,7 @@ export function GamePage({ ctx }: { ctx: AthleteContext }) {
   return (
     <>
       <PageHeader eyebrow="3-bo‘lim" title="O‘yin elementlari" />
-      <p className="lead">Plyometrik mashqlar voleybol harakatlari bilan birlashtirilgan: texnik-taktik tayyorgarlik sakrash kuchi bilan birga o‘sadi.</p>
+      <p className="lead">Sakrash mashqlari voleybol harakatlari bilan uyg‘unlashtirilgan. Bu sakrash kuchi bilan birga texnik va taktik ko‘nikmalarni ham rivojlantiradi.</p>
 
       <Segmented options={GAME_ELEMENTS.map((e) => ({ id: e.id, label: e.name }))} value={element} onChange={setElement} />
       <Artwork key={element} name={`element-${element}`} alt={info.name} className="element-cover" />
@@ -36,7 +36,7 @@ export function GamePage({ ctx }: { ctx: AthleteContext }) {
               <div className="drill__body">
                 <div className="drill__meta">
                   <IntensityBars intensity={d.intensity} />
-                  <span>{locked ? <><Lock size={12} /> {d.minBlock}-blokdan</> : `${rx.sets}×${rx.reps}`}</span>
+                  <span>{locked ? <><Lock size={12} /> {d.minBlock}-bosqichdan</> : `${rx.sets}×${rx.reps}`}</span>
                 </div>
                 <strong>{d.name}</strong>
                 <span className="drill__combo">
@@ -54,7 +54,7 @@ export function GamePage({ ctx }: { ctx: AthleteContext }) {
           <Play size={18} fill="currentColor" /> {info.name}: {open.length} ta mashq
         </a>
       ) : (
-        <p className="muted center">Bu yo‘nalishdagi mashqlar keyingi bloklarda ochiladi.</p>
+        <p className="muted center">Bu yo‘nalishdagi mashqlar keyingi bosqichlarda ochiladi.</p>
       )}
     </>
   );

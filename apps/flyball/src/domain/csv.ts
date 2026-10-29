@@ -17,7 +17,7 @@ export function toCsv(rows: Cell[][]): string {
 
 export function sessionsCsv(state: AppState): string {
   const names = new Map(state.athletes.map((a) => [a.id, a.name]));
-  const rows: Cell[][] = [['Sportchi', 'Sana', 'Turi', 'Blok', 'Mashqlar', 'Sakrashlar', 'Davomiylik (daq)', 'RPE', 'Yuklama (AU)', 'Texnika', 'Izoh']];
+  const rows: Cell[][] = [['Sportchi', 'Sana', 'Turi', 'Bosqich', 'Mashqlar', 'Sakrashlar', 'Davomiylik (daq.)', 'RPE', 'Mashg‘ulot yuklamasi (AU)', 'Texnika', 'Izoh']];
   for (const s of [...state.sessions].sort((a, b) => a.date.localeCompare(b.date))) {
     const items = s.items.map((i) => (i.kind === 'exercise' ? exerciseById(i.refId)?.name : drillById(i.refId)?.name) ?? i.refId).join('; ');
     rows.push([names.get(s.athleteId), s.date, s.kind === 'plyo' ? 'Plyometrika' : 'O‘yin elementlari', s.block ?? '', items, sessionContacts(s), s.durationMin, s.rpe, sessionLoad(s), s.technique, s.note]);

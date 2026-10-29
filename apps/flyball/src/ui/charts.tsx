@@ -16,7 +16,7 @@ export function BarChart({ data, color = 'var(--accent)', highlightLast = true, 
   const slot = innerW / data.length;
   const barW = Math.min(26, slot * 0.6);
   return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Haftalik ustunli diagramma">
+    <svg className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Haftalar bo‘yicha ustunli diagramma">
       {limit != null && (
         <g>
           <line x1={PAD.left} x2={W - PAD.right} y1={PAD.top + innerH - (limit / max) * innerH} y2={PAD.top + innerH - (limit / max) * innerH} className="chart__limit" />

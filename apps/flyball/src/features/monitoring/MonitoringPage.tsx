@@ -33,7 +33,7 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
       <Card className="acwr">
         <div className="acwr__head">
           <div>
-            <p className="eyebrow">Yuklama nisbati (ACWR)</p>
+            <p className="eyebrow">Qisqa va uzoq muddatli yuklama nisbati (ACWR)</p>
             <strong className="acwr__value">{ratio ?? '—'}</strong>
           </div>
           <Pill tone={ZONE_TONE[ctx.load.zone]}>{ZONE_LABEL[ctx.load.zone]}</Pill>
@@ -53,8 +53,8 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
           <span>2+</span>
         </div>
         <p className="muted small">
-          Oxirgi 7 kun: {Math.round(ctx.load.acute)} AU · 4 haftalik o‘rtacha: {Math.round(ctx.load.chronic)} AU. Optimal zona 0.8–1.3.
-          {ratio == null && ctx.sessions.length > 0 && ` Nisbat ${ACWR_MIN_HISTORY_DAYS / 7} haftalik mashg‘ulot tarixidan keyin hisoblanadi.`}
+          Oxirgi 7 kun: {Math.round(ctx.load.acute)} AU · Oxirgi 4 haftalik o‘rtacha: {Math.round(ctx.load.chronic)} AU. Tavsiya etilgan oraliq: 0,8–1,3.
+          {ratio == null && ctx.sessions.length > 0 && ` Nisbatni hisoblash uchun kamida ${ACWR_MIN_HISTORY_DAYS / 7} haftalik mashg‘ulot ma’lumoti kerak.`}
         </p>
       </Card>
 
@@ -62,7 +62,7 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
         <Segmented
           options={[
             { id: 'contacts', label: 'Sakrashlar' },
-            { id: 'load', label: 'sRPE yuklama' },
+            { id: 'load', label: 'Sezilgan zo‘riqish bo‘yicha yuklama (sRPE)' },
           ]}
           value={chart}
           onChange={setChart}
@@ -73,7 +73,7 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
           data={weeks.map((w) => ({ label: formatDate(w.start).split('-')[0], value: chart === 'contacts' ? w.contacts : w.load }))}
           color={chart === 'contacts' ? 'var(--accent)' : 'var(--cool)'}
         />
-        <p className="muted small center">Haftalar (dushanbadan), oxirgi 8 hafta</p>
+        <p className="muted small center">So‘nggi 8 hafta (hafta dushanbadan boshlanadi)</p>
       </Card>
 
       <SectionTitle>Ko‘rsatkichlar dinamikasi</SectionTitle>
@@ -113,7 +113,7 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
       <SectionTitle>Mashg‘ulotlar jurnali</SectionTitle>
       {ctx.sessions.length === 0 ? (
         <Empty icon={<Footprints />} art="empty-sessions" title="Hali mashg‘ulot yo‘q">
-          Birinchi mashg‘ulot saqlangach, jurnal shu yerda paydo bo‘ladi.
+          Birinchi mashg‘ulotni saqlaganingizdan so‘ng, u shu yerda ko‘rinadi.
         </Empty>
       ) : (
         <ul className="log">
@@ -124,14 +124,14 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
                 <span>{formatDate(s.date).split('-')[1]}</span>
               </div>
               <div className="log__body">
-                <strong>{s.kind === 'plyo' ? `${s.block}-blok · ${blockInfo(s.block ?? 1).name}` : 'O‘yin elementlari'}</strong>
+                <strong>{s.kind === 'plyo' ? `${s.block}-bosqich · ${blockInfo(s.block ?? 1).name}` : 'O‘yin elementlari'}</strong>
                 <span>{s.items.map((i) => (i.kind === 'exercise' ? exerciseById(i.refId)?.name : drillById(i.refId)?.name)).join(', ')}</span>
                 <span className="log__nums">
                   {sessionContacts(s)} sakrash · RPE {s.rpe} · {sessionLoad(s)} AU · texnika {s.technique}/5
                 </span>
                 {s.note && <em>“{s.note}”</em>}
               </div>
-              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={async () => (await confirmAction({ title: 'Mashg‘ulotni o‘chirasizmi?', text: 'U jurnal, grafiklar va blok progressidan olib tashlanadi.', confirmLabel: 'O‘chirish', danger: true })) && dispatch({ type: 'removeSession', id: s.id })}>
+              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={async () => (await confirmAction({ title: 'Mashg‘ulotni o‘chirasizmi?', text: 'Bu mashg‘ulot jurnal, grafiklar va bosqich bo‘yicha rivojlanish tarixidan o‘chiriladi.', confirmLabel: 'O‘chirish', danger: true })) && dispatch({ type: 'removeSession', id: s.id })}>
                 <Trash2 size={16} />
               </button>
             </li>
@@ -142,16 +142,16 @@ export function MonitoringPage({ ctx }: { ctx: AthleteContext }) {
       <SectionTitle>Hisobot</SectionTitle>
       <div className="export">
         <button className="btn btn--ghost" onClick={() => exportCsv('flyball-mashgulotlar.csv', sessionsCsv(state))} disabled={state.sessions.length === 0}>
-          <Download size={16} /> Mashg‘ulotlar CSV
+          <Download size={16} /> Mashg‘ulotlar hisoboti (CSV)
         </button>
         <button className="btn btn--ghost" onClick={() => exportCsv('flyball-korsatkichlar.csv', metricsCsv(state))} disabled={state.metrics.length === 0}>
-          <Download size={16} /> Ko‘rsatkichlar CSV
+          <Download size={16} /> Ko‘rsatkichlar hisoboti (CSV)
         </button>
       </div>
       <p className="muted small">
         {state.sessions.length === 0 && state.metrics.length === 0
-          ? 'Hisobot uchun avval mashg‘ulot saqlang yoki ko‘rsatkich kiriting.'
-          : `Barcha sportchilar ma’lumoti; ko‘rsatkichlar faylida ${METRICS.length} ta ustun.`}
+          ? 'Hisobot yaratish uchun avval mashg‘ulot natijasini yoki o‘lchov ko‘rsatkichini saqlang.'
+          : `Hisobot barcha sportchilarning ma’lumotlarini o‘z ichiga oladi. Ko‘rsatkichlar faylida ${METRICS.length} ta ustun mavjud.`}
       </p>
     </>
   );
@@ -174,7 +174,7 @@ function TeamOverview() {
       <Card className="team-table">
         <div className="team-table__row team-table__row--head">
           <span>Sportchi</span>
-          <span>Blok</span>
+          <span>Bosqich</span>
           <span>Sakrash</span>
           <span>ACWR</span>
         </div>

@@ -74,10 +74,10 @@ export function restUntil(sessions: Session[], athleteId: string, now: Date): Da
 
 export const ZONE_LABEL: Record<AcwrZone, string> = {
   nomalum: 'Ma’lumot yetarli emas',
-  kam: 'Yuklama kam',
-  optimal: 'Optimal zona',
+  kam: 'Yuklama me’yordan past',
+  optimal: 'Tavsiya etilgan oraliq',
   yuqori: 'Yuqori',
-  xavfli: 'Jarohat xavfi',
+  xavfli: 'Jarohatlanish xavfi yuqori',
 };
 
 export interface Point {
@@ -127,14 +127,14 @@ export function coachAdvice({ sessions, entries, athleteId, progress, now }: Adv
   const own = sessions.filter((s) => s.athleteId === athleteId).sort((a, b) => a.date.localeCompare(b.date));
 
   if (own.length === 0) {
-    advice.push({ id: 'start', tone: 'info', title: 'Birinchi mashg‘ulot', text: 'Monitoring mashg‘ulotlar saqlangandan keyin boshlanadi. 1-blokdan, to‘g‘ri qo‘nish texnikasidan boshlang.' });
+    advice.push({ id: 'start', tone: 'info', title: 'Birinchi mashg‘ulot', text: 'Mashg‘ulot natijalarini saqlaganingizdan keyin yuklamani kuzatish boshlanadi. Avval 1-bosqichdagi to‘g‘ri qo‘nish mashqlarini bajaring.' });
   }
 
   const load = acwr(sessions, athleteId, now);
   if (load.zone === 'xavfli') {
-    advice.push({ id: 'acwr-high', tone: 'warn', title: 'Yuklama keskin oshgan', text: `Oxirgi 7 kunlik yuklama 4 haftalik o‘rtachadan ${load.ratio} baravar ko‘p. Keyingi 2–3 mashg‘ulotda sakrashlar sonini 20–30% kamaytiring.` });
+    advice.push({ id: 'acwr-high', tone: 'warn', title: 'Yuklama keskin oshgan', text: `So‘nggi 7 kundagi yuklama 4 haftalik o‘rtachadan ${load.ratio} baravar yuqori. Keyingi 2–3 mashg‘ulotda sakrashlar sonini 20–30% ga kamaytiring.` });
   } else if (load.zone === 'kam') {
-    advice.push({ id: 'acwr-low', tone: 'info', title: 'Yuklama pasaygan', text: 'Bu hafta odatdagidan kam mashq qilindi. Tanaffusdan keyin hajmni birdaniga emas, asta-sekin tiklang.' });
+    advice.push({ id: 'acwr-low', tone: 'info', title: 'Yuklama pasaygan', text: 'Bu hafta odatdagidan kamroq mashq qildingiz. Tanaffusdan keyin yuklamani birdaniga emas, asta-sekin oshiring.' });
   }
 
   const recent = own.slice(-3);
@@ -142,20 +142,20 @@ export function coachAdvice({ sessions, entries, athleteId, progress, now }: Adv
     const rpe = recent.reduce((s, x) => s + x.rpe, 0) / 3;
     const technique = recent.reduce((s, x) => s + x.technique, 0) / 3;
     if (rpe >= 8) {
-      advice.push({ id: 'fatigue', tone: 'warn', title: 'Charchoq belgilari', text: `Oxirgi 3 mashg‘ulotda o‘rtacha RPE ${rpe.toFixed(1)}. Bitta yengil kun yoki to‘liq dam olish kunini rejalashtiring.` });
+      advice.push({ id: 'fatigue', tone: 'warn', title: 'Charchoq belgilari', text: `So‘nggi 3 mashg‘ulotdagi o‘rtacha zo‘riqish darajasi (RPE): ${rpe.toFixed(1)}. Bir kun yengil mashq qiling yoki to‘liq dam oling.` });
     }
     if (technique < 3) {
-      advice.push({ id: 'technique', tone: 'warn', title: 'Texnikaga e’tibor', text: 'Texnika bahosi pasaygan. Yuklamani oshirmang: tumba balandligini pasaytiring va qo‘nish mashqlarini takrorlang.' });
+      advice.push({ id: 'technique', tone: 'warn', title: 'Texnikaga e’tibor', text: 'Harakat texnikasi uchun qo‘yilgan baho pasaygan. Yuklamani oshirmang: platforma balandligini kamaytiring va to‘g‘ri qo‘nish mashqlarini takrorlang.' });
     }
   }
 
   const active = progress.find((p) => p.state === 'active');
   if (active && active.sessions >= MASTERY.minSessions && (active.recentTechnique ?? 0) < MASTERY.techniqueAvg) {
-    advice.push({ id: 'block-gate', tone: 'info', title: `${active.block}-blokda qolish`, text: `Mashg‘ulotlar soni yetarli, ammo texnika o‘rtachasi ${active.recentTechnique ?? '—'} (kerak: ${MASTERY.techniqueAvg}). Keyingi blokka o‘tishdan oldin sifatni oshiring.` });
+    advice.push({ id: 'block-gate', tone: 'info', title: `${active.block}-bosqichda qolish`, text: `Mashg‘ulotlar soni yetarli, ammo texnika bo‘yicha o‘rtacha baho ${active.recentTechnique ?? '—'} (talab: ${MASTERY.techniqueAvg}). Keyingi bosqichga o‘tishdan oldin texnikani yaxshilang.` });
   }
   const mastered = progress.filter((p) => p.state === 'mastered');
   if (mastered.length > 0 && active) {
-    advice.push({ id: 'block-up', tone: 'good', title: `${active.block}-blok ochilgan`, text: `${mastered.length} ta blok o‘zlashtirildi. Yangi blokning birinchi haftasida hajmni 80% dan boshlang.` });
+    advice.push({ id: 'block-up', tone: 'good', title: `${active.block}-bosqich ochildi`, text: `${mastered.length} ta bosqich o‘zlashtirildi. Yangi bosqichning birinchi haftasida mashg‘ulot hajmini belgilangan me’yorning 80% idan boshlang.` });
   }
 
   const jumps = metricSeries(entries, athleteId, 'verticalJump');
@@ -163,18 +163,18 @@ export function coachAdvice({ sessions, entries, athleteId, progress, now }: Adv
     const last = jumps[jumps.length - 1].value;
     const prev = jumps[jumps.length - 2].value;
     if (last - jumps[0].value >= 2) {
-      advice.push({ id: 'jump-up', tone: 'good', title: 'Sakrovchanlik o‘smoqda', text: `Joyidan sakrash ${jumps[0].value} sm dan ${last} sm gacha oshdi. Joriy metodika samarali.` });
+      advice.push({ id: 'jump-up', tone: 'good', title: 'Sakrovchanlik o‘smoqda', text: `Joyidan sakrash natijasi ${jumps[0].value} sm dan ${last} sm gacha yaxshilandi. Hozirgi mashg‘ulot usuli natija beryapti.` });
     }
     if (jumps.length >= 3 && last <= prev && prev <= jumps[jumps.length - 3].value) {
-      advice.push({ id: 'jump-plateau', tone: 'warn', title: 'Natija to‘xtab qolgan', text: 'Oxirgi uchta testda sakrash o‘smadi. Mashqlar to‘plamini almashtiring yoki bir haftalik yengillashtirilgan sikl qo‘llang.' });
+      advice.push({ id: 'jump-plateau', tone: 'warn', title: 'Natija to‘xtab qolgan', text: 'So‘nggi uchta testda sakrash natijasi oshmadi. Mashqlarni o‘zgartiring yoki bir hafta yengillashtirilgan yuklama bilan shug‘ullaning.' });
     }
   }
 
   const lastTest = entries.filter((e) => e.athleteId === athleteId).map((e) => e.date).sort().pop();
   if (!lastTest) {
-    advice.push({ id: 'no-tests', tone: 'info', title: 'Boshlang‘ich test', text: 'Individual yuklama uchun bo‘y, vazn, Rufye indeksi va joyidan sakrash natijasini kiriting.' });
+    advice.push({ id: 'no-tests', tone: 'info', title: 'Boshlang‘ich test', text: 'Yuklamani sizga moslash uchun bo‘y, vazn, Rufye indeksi va joyidan sakrash natijalarini kiriting.' });
   } else if (daysBetween(parseISODate(lastTest), now) > 28) {
-    advice.push({ id: 'retest', tone: 'info', title: 'Qayta test vaqti', text: 'Oxirgi o‘lchovdan 4 haftadan ko‘p vaqt o‘tdi. Dinamikani ko‘rish uchun testlarni takrorlang.' });
+    advice.push({ id: 'retest', tone: 'info', title: 'Qayta test vaqti', text: 'So‘nggi o‘lchovdan beri 4 haftadan ortiq vaqt o‘tdi. O‘zgarishlarni kuzatish uchun testlarni qayta bajaring.' });
   }
 
   const order = { warn: 0, info: 1, good: 2 };

@@ -16,7 +16,7 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
     return (
       <>
         <PageHeader title="Topilmadi" back={back} />
-        <Empty icon={<Dumbbell />} title="Bunday mashq yo‘q" />
+        <Empty icon={<Dumbbell />} title="Bunday mashq topilmadi" />
       </>
     );
   }
@@ -24,11 +24,11 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
   const rx = prescribe(item, ctx.profile);
   const block = exercise ? blockInfo(exercise.block) : blockInfo(drill!.minBlock);
   const locked = exercise ? ctx.progress[exercise.block - 1].state === 'locked' : drill!.minBlock > ctx.block;
-  const usesBox = exercise?.equipment.some((e) => e.startsWith('Tumba')) || item.motion === 'depth';
+  const usesBox = exercise?.equipment.some((e) => e.startsWith('Platforma')) || item.motion === 'depth';
 
   return (
     <>
-      <PageHeader eyebrow={exercise ? `${exercise.block}-blok · ${block.name}` : GAME_ELEMENTS.find((e) => e.id === drill!.element)?.name} title={item.name} back={back} />
+      <PageHeader eyebrow={exercise ? `${exercise.block}-bosqich · ${block.name}` : GAME_ELEMENTS.find((e) => e.id === drill!.element)?.name} title={item.name} back={back} />
 
       <div className="stage" style={{ '--block': block.color } as React.CSSProperties}>
         <Artwork name={`${exercise ? 'ex' : 'drill'}-${item.id}`} alt={item.name} fallback={<AthleteMotion motion={item.motion} label={item.name} />} />
@@ -38,15 +38,15 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
       <p className="lead">{item.summary}</p>
 
       <div className="pill-row">
-        <Pill color={block.color}>Intensivlik: {INTENSITY_LABEL[item.intensity]}</Pill>
+        <Pill color={block.color}>Mashq jadalligi: {INTENSITY_LABEL[item.intensity]}</Pill>
         {exercise?.equipment.map((e) => <Pill key={e}>{e}</Pill>)}
-        {drill && <Pill>{drill.minBlock}-blokdan boshlab</Pill>}
+        {drill && <Pill>{drill.minBlock}-bosqichdan boshlab</Pill>}
       </div>
 
       {locked && (
         <Card className="notice">
           <Lock size={18} />
-          <p>Bu mashq {block.name.toLowerCase()} blok ochilganda mashg‘ulot rejasiga qo‘shiladi. Hozircha tanishib chiqish uchun.</p>
+          <p>Bu mashq {block.name.toLowerCase()} bosqich ochilgach mashg‘ulot rejasiga qo‘shiladi. Hozir esa mashq bilan tanishishingiz mumkin.</p>
         </Card>
       )}
 
@@ -86,7 +86,7 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
             <span>sakrash</span>
           </div>
         </div>
-        {usesBox && <p className="muted small">Tumba balandligi {ctx.profile.maxBoxCm} sm dan oshmasin.</p>}
+        {usesBox && <p className="muted small">Platforma balandligi {ctx.profile.maxBoxCm} sm dan oshmasin.</p>}
       </Card>
 
       <h2 className="h2">Bajarish tartibi</h2>
@@ -96,7 +96,7 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
         ))}
       </ol>
 
-      <h2 className="h2">Murabbiy eslatmalari</h2>
+      <h2 className="h2">Murabbiy tavsiyalari</h2>
       <ul className="cues">
         {item.cues.map((c) => (
           <li key={c}>{c}</li>
@@ -105,7 +105,7 @@ export function DetailPage({ kind, id, ctx }: { kind: 'exercise' | 'drill'; id: 
 
       {exercise && !locked && (
         <a className="btn btn--primary btn--block" href={href({ name: 'run-plyo', block: exercise.block })}>
-          <Play size={18} fill="currentColor" /> {exercise.block}-blok mashg‘ulotini boshlash
+          <Play size={18} fill="currentColor" /> {exercise.block}-bosqich mashg‘ulotini boshlash
         </a>
       )}
 

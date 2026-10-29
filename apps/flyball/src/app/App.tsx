@@ -17,7 +17,7 @@ const TABS: { route: Route; label: string; icon: typeof Zap; match: Route['name'
   { route: { name: 'home' }, label: 'Bugun', icon: Zap, match: ['home'] },
   { route: { name: 'training' }, label: 'Mashqlar', icon: Layers, match: ['training', 'exercise'] },
   { route: { name: 'game' }, label: 'O‘yin', icon: Volleyball, match: ['game', 'drill'] },
-  { route: { name: 'metrics' }, label: 'Ko‘rsatkich', icon: Ruler, match: ['metrics'] },
+  { route: { name: 'metrics' }, label: 'Natijalar', icon: Ruler, match: ['metrics'] },
   { route: { name: 'monitoring' }, label: 'Monitoring', icon: ChartLine, match: ['monitoring'] },
 ];
 
@@ -44,7 +44,7 @@ export function App() {
   return (
     <div className="app">
       <div className="topbar">
-        <a className="brand" href="#/" aria-label="Flyball bosh sahifa">
+        <a className="brand" href="#/" aria-label="Flyball — bosh sahifa">
           <span className="brand__mark" aria-hidden>
             <Volleyball size={18} strokeWidth={2.5} />
           </span>

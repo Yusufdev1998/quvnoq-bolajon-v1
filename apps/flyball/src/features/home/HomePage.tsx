@@ -33,13 +33,13 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
       <section className={`today ${cover ? 'today--art' : ''}`} style={{ '--block': info.color } as React.CSSProperties}>
         {cover && <div className="today__art" style={{ backgroundImage: `url(${cover})`, backgroundPosition: artFocus(`block-${ctx.block}`) }} aria-hidden />}
         <div className="today__top">
-          <span className="today__badge">{ctx.block}-blok</span>
+          <span className="today__badge">{ctx.block}-bosqich</span>
           <span className="today__name">{info.name}</span>
         </div>
-        <h2 className="today__title">{ctx.restUntil ? 'Bugun dam olish kuni' : 'Bugungi mashg‘ulot'}</h2>
+        <h2 className="today__title">{ctx.restUntil ? 'Bugun — dam olish kuni' : 'Bugungi mashg‘ulot'}</h2>
         {ctx.restUntil && (
           <p className="today__note">
-            Plyometrik mashg‘ulotlar orasida {MIN_REST_DAYS * 24} soat dam kerak: paylar va mushaklar tiklanadi. Keyingi mashg‘ulot{' '}
+            Sakrash mashg‘ulotlari orasida {MIN_REST_DAYS * 24} soat tanaffus qilish kerak. Bu vaqtda mushaklar va paylar tiklanadi. Keyingi mashg‘ulot{' '}
             {formatDate(toISODate(ctx.restUntil))} kuni.
           </p>
         )}
@@ -69,7 +69,7 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
         </ol>
         {/* The coach can still overrule the rest day, but it is no longer the obvious action. */}
         <a className={`btn ${ctx.restUntil ? 'btn--ghost' : 'btn--primary'} btn--block`} href={href({ name: 'run-plyo' })}>
-          <Play size={18} fill="currentColor" /> {ctx.restUntil ? 'Baribir boshlash' : 'Mashg‘ulotni boshlash'}
+          <Play size={18} fill="currentColor" /> {ctx.restUntil ? 'Shunga qaramay boshlash' : 'Mashg‘ulotni boshlash'}
         </a>
       </section>
 
@@ -80,14 +80,14 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
             value={ctx.values.verticalJump ?? '—'}
             unit={ctx.values.verticalJump != null ? 'sm' : undefined}
             tone={jumpTrend?.improving ? 'good' : undefined}
-            sub={jumpTrend ? `${jumpTrend.delta > 0 ? '+' : ''}${jumpTrend.delta} sm boshidan` : jump.length > 0 ? 'Birinchi o‘lchov' : 'Test kiritilmagan'}
+            sub={jumpTrend ? `${jumpTrend.delta > 0 ? '+' : ''}${jumpTrend.delta} sm dastlabki o‘lchovga nisbatan` : jump.length > 0 ? 'Birinchi o‘lchov' : 'Hali test natijasi kiritilmagan'}
           />
         </Card>
         <Card>
           <Stat label="ACWR" value={ctx.load.ratio ?? '—'} tone={zoneTone} sub={ZONE_LABEL[ctx.load.zone]} />
         </Card>
         <Card className="stat-grid__wide">
-          <Stat label="Haftalik sakrashlar" value={weekContacts} sub={`Bir mashg‘ulot chegarasi: ${ctx.profile.contactsBudget}`} />
+          <Stat label="Haftalik sakrashlar" value={weekContacts} sub={`Bir mashg‘ulot uchun limit: ${ctx.profile.contactsBudget} ta sakrash`} />
           <Meter value={weekContacts} max={ctx.profile.contactsBudget * 3} />
         </Card>
       </div>
@@ -100,15 +100,15 @@ export function HomePage({ ctx }: { ctx: AthleteContext }) {
             <strong>{ctx.profile.levelLabel} daraja</strong>
           </div>
           <a className="link" href={href({ name: 'metrics' })}>
-            Batafsil <ArrowUpRight size={14} />
+            Batafsil ko‘rish <ArrowUpRight size={14} />
           </a>
         </div>
         <div className="kv">
-          <span>Sakrashlar / mashg‘ulot</span>
+          <span>Bir mashg‘ulotdagi sakrashlar</span>
           <b>≤ {ctx.profile.contactsBudget}</b>
-          <span>Tumba balandligi</span>
+          <span>Platforma balandligi</span>
           <b>≤ {ctx.profile.maxBoxCm} sm</b>
-          <span>Dam olish koeffitsienti</span>
+          <span>Dam olish vaqti koeffitsienti</span>
           <b>×{ctx.profile.restFactor}</b>
         </div>
       </Card>

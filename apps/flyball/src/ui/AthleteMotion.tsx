@@ -7,7 +7,7 @@ export function AthleteMotion({ motion, label }: { motion: Motion; label: string
   const armsUp = ARMS_UP.includes(motion);
   const net = motion === 'block' || motion === 'approach';
   return (
-    <svg className={`motion motion--${motion}`} viewBox="0 0 240 170" role="img" aria-label={`Harakat namunasi: ${label}`}>
+    <svg className={`motion motion--${motion}`} viewBox="0 0 240 170" role="img" aria-label={`Mashq harakatining namunasi: ${label}`}>
       <defs>
         <pattern id="mesh" width="6" height="6" patternUnits="userSpaceOnUse">
           <path d="M0 0L6 6M6 0L0 6" stroke="currentColor" strokeWidth="0.6" opacity="0.5" />

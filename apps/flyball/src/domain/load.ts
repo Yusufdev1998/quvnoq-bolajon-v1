@@ -44,9 +44,9 @@ export function buildLoadProfile(athlete: Athlete, values: MetricValues, now: Da
   if (values.verticalJump != null) {
     const rating = rateVerticalJump(values.verticalJump, age);
     level = rating === 'yuqori' ? 3 : rating === 'orta' ? 2 : 1;
-    notes.push({ tone: 'info', text: `Sakrovchanlik ${values.verticalJump} sm — yosh me’yoriga ko‘ra ${RATING_LABEL[rating].toLowerCase()} daraja.` });
+    notes.push({ tone: 'info', text: `Joyidan sakrash: ${values.verticalJump} sm. Yosh me’yoriga ko‘ra daraja: ${RATING_LABEL[rating].toLowerCase()}.` });
   } else {
-    notes.push({ tone: 'info', text: 'Joyidan sakrash natijasi kiritilmagan, shuning uchun yuklama boshlang‘ich darajada.' });
+    notes.push({ tone: 'info', text: 'Joyidan sakrash natijasi hali kiritilmagan. Shu sababli yuklama boshlang‘ich darajada belgilandi.' });
   }
 
   if (values.rufier != null) {
@@ -54,16 +54,16 @@ export function buildLoadProfile(athlete: Athlete, values: MetricValues, now: Da
     if (values.rufier > 10) {
       level = Math.max(1, level - 1) as Level;
       restFactor = 1.5;
-      notes.push({ tone: 'warn', text: `Rufye indeksi ${values.rufier} (${label.toLowerCase()}): dam olish 1,5 baravar uzaytirildi, daraja bir pog‘ona pasaytirildi.` });
+      notes.push({ tone: 'warn', text: `Rufye indeksi: ${values.rufier} (${label.toLowerCase()}). Dam olish vaqti 1,5 baravar oshirildi va yuklama darajasi bir pog‘ona pasaytirildi.` });
     } else if (values.rufier > 5) {
       restFactor = 1.2;
-      notes.push({ tone: 'info', text: `Rufye indeksi ${values.rufier} (qoniqarli): dam olish 20% uzaytirildi.` });
+      notes.push({ tone: 'info', text: `Rufye indeksi: ${values.rufier} (qoniqarli). Dam olish vaqti 20% ga uzaytirildi.` });
     }
   }
 
   if (values.restingHr != null && values.restingHr > 90) {
     restFactor = Math.max(restFactor, 1.3);
-    notes.push({ tone: 'warn', text: `Tinch holatdagi puls ${values.restingHr}: tiklanish sust, to‘plamlar orasidagi dam olish uzaytirildi.` });
+    notes.push({ tone: 'warn', text: `Tinch holatdagi yurak urishi: ${values.restingHr}. Tiklanish sust bo‘lgani uchun to‘plamlar orasidagi dam olish vaqti uzaytirildi.` });
   }
 
   const base = LEVELS[level];
@@ -74,7 +74,7 @@ export function buildLoadProfile(athlete: Athlete, values: MetricValues, now: Da
   if (age < 13) {
     contactsBudget = Math.min(contactsBudget, 90);
     maxBoxCm = Math.min(maxBoxCm, 30);
-    notes.push({ tone: 'info', text: 'Yosh 13 dan kichik: mashg‘ulotdagi sakrashlar soni va tumba balandligi cheklangan.' });
+    notes.push({ tone: 'info', text: '13 yoshdan kichik sportchilar uchun mashg‘ulotdagi sakrashlar soni va platforma balandligi cheklangan.' });
   }
 
   const index = bmi(values);
@@ -82,7 +82,7 @@ export function buildLoadProfile(athlete: Athlete, values: MetricValues, now: Da
     volumeFactor *= 0.85;
     contactsBudget = Math.round(contactsBudget * 0.85);
     maxBoxCm -= 10;
-    notes.push({ tone: 'warn', text: `Tana vazni indeksi ${index}: bo‘g‘imlarni asrash uchun hajm 15% kamaytirildi, tumba pastroq.` });
+    notes.push({ tone: 'warn', text: `Tana vazni indeksi: ${index}. Bo‘g‘imlarga tushadigan yukni kamaytirish uchun mashg‘ulot hajmi 15% ga qisqartirildi va platforma balandligi pasaytirildi.` });
   }
 
   return { level, levelLabel: base.label, contactsBudget, volumeFactor, restFactor, maxBoxCm, notes };

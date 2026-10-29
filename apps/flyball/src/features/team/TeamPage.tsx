@@ -27,7 +27,7 @@ export function TeamPage() {
           value={state.role ?? 'coach'}
           onChange={(role) => dispatch({ type: 'setRole', role })}
         />
-        <p className="muted small">{coach ? 'Bir nechta sportchini kuzatish, jamoa monitoringi va hisobot.' : 'Mustaqil mashg‘ulotlar uchun bitta profil.'}</p>
+        <p className="muted small">{coach ? 'Bir nechta sportchining mashg‘ulotlari va natijalarini kuzatish, hisobotlar olish.' : 'Shaxsiy mashg‘ulotlar va natijalarni kuzatish uchun bitta profil.'}</p>
       </Card>
 
       <SectionTitle
@@ -112,15 +112,15 @@ export function TeamPage() {
 
       <SectionTitle>Ma’lumotlar</SectionTitle>
       <Card>
-        <p className="muted small">Barcha ma’lumotlar faqat shu qurilmada saqlanadi. Ro‘yxatdan o‘tish, server yoki tashqi uzatish yo‘q.</p>
+        <p className="muted small">Ma’lumotlaringiz faqat shu qurilmada saqlanadi. Ro‘yxatdan o‘tish talab qilinmaydi va ma’lumotlar serverga yuborilmaydi.</p>
         <button
           className="btn btn--danger"
           onClick={async () =>
-            (await confirmAction({ title: 'Hammasini tozalaysizmi?', text: 'Barcha sportchilar, o‘lchovlar va mashg‘ulotlar qurilmadan o‘chiriladi. Buni qaytarib bo‘lmaydi.', confirmLabel: 'Tozalash', danger: true })) &&
+            (await confirmAction({ title: 'Barcha ma’lumotlarni o‘chirasizmi?', text: 'Barcha sportchilar, o‘lchovlar va mashg‘ulotlar haqidagi ma’lumotlar qurilmadan butunlay o‘chiriladi. Ularni qayta tiklab bo‘lmaydi.', confirmLabel: 'O‘chirish', danger: true })) &&
             dispatch({ type: 'reset' })
           }
         >
-          <RotateCcw size={16} /> Hammasini tozalash
+          <RotateCcw size={16} /> Barcha ma’lumotlarni o‘chirish
         </button>
       </Card>
     </>

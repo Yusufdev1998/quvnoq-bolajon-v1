@@ -87,18 +87,18 @@ export function MetricsPage({ ctx }: { ctx: AthleteContext }) {
         Joyidan sakrash me’yori ({age} yosh): past &lt; {jumpNorm(age).low} sm, yuqori ≥ {jumpNorm(age).high} sm. Me’yorlar taxminiy va murabbiy tomonidan moslashtiriladi.
       </p>
 
-      <SectionTitle>Yuklama qanday moslashtirildi</SectionTitle>
+      <SectionTitle>Yuklama qanday moslashtirilgan?</SectionTitle>
       <Card className="explain">
         <div className="kv">
           <span>Daraja</span>
           <b>{ctx.profile.levelLabel}</b>
-          <span>Sakrashlar / mashg‘ulot</span>
+          <span>Bir mashg‘ulotdagi sakrashlar</span>
           <b>≤ {ctx.profile.contactsBudget}</b>
-          <span>Takrorlar koeffitsienti</span>
+          <span>Takrorlash koeffitsienti</span>
           <b>×{Math.round(ctx.profile.volumeFactor * 100) / 100}</b>
-          <span>Dam olish koeffitsienti</span>
+          <span>Dam olish vaqti koeffitsienti</span>
           <b>×{ctx.profile.restFactor}</b>
-          <span>Tumba balandligi</span>
+          <span>Platforma balandligi</span>
           <b>≤ {ctx.profile.maxBoxCm} sm</b>
         </div>
         <ul className="explain__notes">
@@ -112,8 +112,8 @@ export function MetricsPage({ ctx }: { ctx: AthleteContext }) {
 
       <SectionTitle>O‘lchovlar tarixi</SectionTitle>
       {ctx.entries.length === 0 ? (
-        <Empty icon={<Ruler />} art="empty-metrics" title="Hali o‘lchov kiritilmagan">
-          Yuqoridagi “+” tugmasi orqali boshlang‘ich testni kiriting.
+        <Empty icon={<Ruler />} art="empty-metrics" title="Hali hech qanday o‘lchov kiritilmagan">
+          Dastlabki o‘lchovlarni kiritish uchun yuqoridagi «+» tugmasini bosing.
         </Empty>
       ) : (
         <ul className="history">
@@ -127,7 +127,7 @@ export function MetricsPage({ ctx }: { ctx: AthleteContext }) {
                     .join(' · ')}
                 </span>
               </div>
-              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={async () => (await confirmAction({ title: 'O‘lchovni o‘chirasizmi?', text: `${formatDate(e.date)} sanadagi barcha qiymatlar o‘chiriladi.`, confirmLabel: 'O‘chirish', danger: true })) && dispatch({ type: 'removeMetrics', id: e.id })}>
+              <button className="icon-btn icon-btn--quiet" aria-label="O‘chirish" onClick={async () => (await confirmAction({ title: 'O‘lchovni o‘chirasizmi?', text: `${formatDate(e.date)} sanasida kiritilgan barcha ko‘rsatkichlar o‘chiriladi.`, confirmLabel: 'O‘chirish', danger: true })) && dispatch({ type: 'removeMetrics', id: e.id })}>
                 <Trash2 size={17} />
               </button>
             </li>
@@ -175,7 +175,7 @@ function MetricForm({ ctx, onClose }: { ctx: AthleteContext; onClose: () => void
         <span>Sana</span>
         <input type="date" value={date} max={toISODate(new Date())} onChange={(e) => setDate(e.target.value)} />
       </label>
-      <p className="muted small">Faqat o‘lchangan ko‘rsatkichlarni kiriting — qolganlari avvalgi qiymatda qoladi.</p>
+      <p className="muted small">Faqat o‘lchagan ko‘rsatkichlaringizni kiriting. Qolganlari avvalgi qiymati bilan saqlanadi.</p>
       {METRIC_GROUPS.map((g) => (
         <fieldset key={g.id} className="fieldset">
           <legend>{g.label}</legend>

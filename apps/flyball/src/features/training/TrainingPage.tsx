@@ -7,15 +7,15 @@ import { MASTERY } from '../../domain/progression.ts';
 import { Artwork } from '../../ui/art.tsx';
 import { IntensityBars, Meter, PageHeader, Pill } from '../../ui/kit.tsx';
 
-const STATE_LABEL = { locked: 'Yopiq', active: 'Joriy', mastered: 'O‘zlashtirildi' };
+const STATE_LABEL = { locked: 'Hali ochilmagan', active: 'Hozirgi bosqich', mastered: 'O‘zlashtirildi' };
 
 export function TrainingPage({ ctx }: { ctx: AthleteContext }) {
   return (
     <>
       <PageHeader eyebrow="1-bo‘lim" title="Plyometrik mashqlar" />
       <p className="lead">
-        Mashqlar to‘rtta metodik blokda, yuklama bosqichma-bosqich oshadi. Keyingi blok oldingisi o‘zlashtirilgach ochiladi: kamida {MASTERY.minSessions} ta
-        mashg‘ulot va oxirgi {MASTERY.window} tasida texnika o‘rtachasi {MASTERY.techniqueAvg} va undan yuqori.
+        Mashqlar to‘rtta bosqichga bo‘lingan. Yuklama asta-sekin oshadi. Keyingi bosqich ochilishi uchun kamida {MASTERY.minSessions} ta
+        mashg‘ulot va oxirgi {MASTERY.window} tasida texnika o‘rtachasi {MASTERY.techniqueAvg} yoki undan yuqori bo‘lishi kerak.
       </p>
 
       <ol className="track">
@@ -28,10 +28,10 @@ export function TrainingPage({ ctx }: { ctx: AthleteContext }) {
                 <span className="track__dot">{p.state === 'mastered' ? <Check size={16} strokeWidth={3} /> : locked ? <Lock size={14} /> : b.id}</span>
               </div>
               <div className="track__body">
-                <Artwork name={`block-${b.id}`} alt={`${b.id}-blok: ${b.name}`} className="track__cover" />
+                <Artwork name={`block-${b.id}`} alt={`${b.id}-bosqich: ${b.name}`} className="track__cover" />
                 <div className="track__head">
                   <div>
-                    <p className="eyebrow">{b.id}-blok</p>
+                    <p className="eyebrow">{b.id}-bosqich</p>
                     <h2>{b.name}</h2>
                   </div>
                   <Pill tone={p.state === 'mastered' ? 'good' : locked ? 'muted' : undefined} color={p.state === 'active' ? b.color : undefined}>
@@ -42,7 +42,7 @@ export function TrainingPage({ ctx }: { ctx: AthleteContext }) {
                 {!locked && (
                   <div className="track__progress">
                     <span>
-                      {Math.min(p.sessions, MASTERY.minSessions)}/{MASTERY.minSessions} mashg‘ulot · texnika {p.recentTechnique ?? '—'}
+                      {Math.min(p.sessions, MASTERY.minSessions)}/{MASTERY.minSessions} ta mashg‘ulot · texnika bahosi {p.recentTechnique ?? '—'}
                     </span>
                     <Meter value={Math.min(p.sessions, MASTERY.minSessions)} max={MASTERY.minSessions} color={b.color} />
                   </div>
@@ -69,7 +69,7 @@ export function TrainingPage({ ctx }: { ctx: AthleteContext }) {
                 </ul>
                 {!locked && (
                   <a className={`btn ${p.state === 'active' ? 'btn--primary' : 'btn--ghost'}`} href={href({ name: 'run-plyo', block: b.id })}>
-                    <Play size={16} fill="currentColor" /> {p.state === 'mastered' ? 'Takrorlash' : `${b.id}-blok mashg‘uloti`}
+                    <Play size={16} fill="currentColor" /> {p.state === 'mastered' ? 'Takrorlash' : `${b.id}-bosqich mashg‘uloti`}
                   </a>
                 )}
               </div>

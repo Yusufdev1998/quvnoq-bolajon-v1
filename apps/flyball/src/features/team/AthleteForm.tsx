@@ -4,7 +4,7 @@ import type { Athlete, Position } from '../../domain/types.ts';
 
 export const POSITION_LABEL: Record<Position, string> = {
   hujumchi: 'Hujumchi',
-  diagonal: 'Diagonal',
+  diagonal: 'Diagonal hujumchi',
   markaziy: 'Markaziy blokchi',
   boglovchi: 'Bog‘lovchi',
   libero: 'Libero',
@@ -18,7 +18,7 @@ export function AthleteForm({ initial, submitLabel, onSubmit, onCancel }: { init
   const [touched, setTouched] = useState(false);
 
   const by = Number(birthYear);
-  const nameError = name.trim().length < 2 ? 'Ismni kiriting' : null;
+  const nameError = name.trim().length < 2 ? 'Ismingizni kiriting' : null;
   const yearError = !Number.isInteger(by) || by < year - 25 || by > year - 8 ? `${year - 25}–${year - 8} oralig‘ida` : null;
 
   const submit = (e: React.FormEvent) => {
@@ -39,7 +39,7 @@ export function AthleteForm({ initial, submitLabel, onSubmit, onCancel }: { init
         <input inputMode="numeric" value={birthYear} onChange={(e) => setBirthYear(e.target.value)} />
       </label>
       <div className="field">
-        <span>O‘yin amplua</span>
+        <span>O‘yindagi pozitsiya</span>
         <div className="chips">
           {(Object.keys(POSITION_LABEL) as Position[]).map((p) => (
             <button type="button" key={p} className={p === position ? 'is-active' : ''} onClick={() => setPosition(p)}>

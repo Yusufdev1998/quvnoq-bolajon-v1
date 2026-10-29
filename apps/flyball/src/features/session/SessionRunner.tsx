@@ -23,7 +23,7 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
       const block = route.block ?? ctx.block;
       const locked = ctx.progress[block - 1].state === 'locked';
       const plan = locked ? [] : planWorkout<Exercise>(exercisesOfBlock(block), ctx.profile, ctx.progress[block - 1].sessions);
-      return { kind: 'plyo' as const, block, title: `${block}-blok · ${blockInfo(block).name}`, color: blockInfo(block).color, plan: plan as PlannedItem<Item>[] };
+      return { kind: 'plyo' as const, block, title: `${block}-bosqich · ${blockInfo(block).name}`, color: blockInfo(block).color, plan: plan as PlannedItem<Item>[] };
     }
     const element = GAME_ELEMENTS.find((e) => e.id === route.element)!;
     const pool = GAME_DRILLS.filter((d) => d.element === route.element && d.minBlock <= ctx.block);
@@ -54,7 +54,7 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
   const exit = async () => {
     const leave =
       phase === 'preview' ||
-      (await confirmAction({ title: 'Mashg‘ulotdan chiqasizmi?', text: 'Bajarilgan to‘plamlar saqlanmaydi.', confirmLabel: 'Chiqish', danger: true }));
+      (await confirmAction({ title: 'Mashg‘ulotdan chiqasizmi?', text: 'Bajarilgan mashqlar va to‘plamlar saqlanmaydi.', confirmLabel: 'Chiqish', danger: true }));
     if (leave) navigate({ name: 'home' });
   };
 
@@ -72,8 +72,8 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
     return (
       <div className="runner">
         {header}
-        <Empty icon={<Footprints />} title="Mashg‘ulot tuzib bo‘lmadi">
-          Bu blok hali ochilmagan yoki mos mashq yo‘q.
+        <Empty icon={<Footprints />} title="Mashg‘ulot rejasini tuzib bo‘lmadi">
+          Bu bosqich hali ochilmagan yoki unga mos mashqlar mavjud emas.
         </Empty>
       </div>
     );
@@ -118,7 +118,7 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
         {header}
         <div className="runner__body">
           <p className="eyebrow">{ctx.athlete.name} uchun reja</p>
-          <h1 className="runner__h1">Mashg‘ulotga tayyormisiz?</h1>
+          <h1 className="runner__h1">Mashg‘ulotni boshlashga tayyormisiz?</h1>
           <div className="today__numbers today__numbers--plain">
             <div>
               <strong>{setup.plan.length}</strong>
@@ -135,7 +135,7 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
           </div>
           <div className="warmup">
             <Timer size={18} />
-            <p>Avval 8–10 daqiqa isining: yengil yugurish, bo‘g‘imlarni aylantirish va dinamik cho‘zilish.</p>
+            <p>Boshlashdan oldin 8–10 daqiqa badan qizdiring: yengil yuguring, bo‘g‘imlarni aylantiring va dinamik cho‘zilish mashqlarini bajaring.</p>
           </div>
           <ol className="plan">
             {setup.plan.map((p, i) => (
@@ -201,11 +201,11 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
           )}
         </div>
         <VideoCredit name={`${setup.kind === 'plyo' ? 'ex' : 'drill'}-${current.item.id}`} />
-        <p className="eyebrow">{phase === 'rest' ? 'Keyingisi' : `To‘plam ${set} / ${current.sets}`}</p>
+        <p className="eyebrow">{phase === 'rest' ? 'Keyingi mashq' : `${set}-to‘plam / ${current.sets}`}</p>
         <h1 className="runner__h1">{current.item.name}</h1>
         <div className="reps">
           <strong>{current.reps}</strong>
-          <span>takror</span>
+          <span>marta</span>
         </div>
         <ul className="cues cues--compact">
           {current.item.cues.map((c) => (
@@ -216,12 +216,12 @@ export function SessionRunner({ route, ctx }: { route: RunRoute; ctx: AthleteCon
       <div className="runner__actions">
         {phase === 'rest' ? (
           <button className="btn btn--ghost btn--block btn--lg" onClick={() => setPhase('work')}>
-            <SkipForward size={20} /> Dam olishni o‘tkazish
+            <SkipForward size={20} /> Dam olishni o‘tkazib yuborish
           </button>
         ) : (
           <>
             <button className="btn btn--primary btn--block btn--lg" onClick={completeSet}>
-              <Check size={22} strokeWidth={3} /> To‘plam bajarildi
+              <Check size={22} strokeWidth={3} /> To‘plam tugadi
             </button>
             <button className="btn btn--text" onClick={skipItem}>
               Mashqni o‘tkazib yuborish
@@ -280,7 +280,7 @@ function FinishForm({
       {header}
       <div className="runner__body">
         <p className="eyebrow">Mashg‘ulot yakunlandi</p>
-        <h1 className="runner__h1">Natijani baholang</h1>
+        <h1 className="runner__h1">Mashg‘ulotni baholang</h1>
         <div className="today__numbers today__numbers--plain">
           <div>
             <strong>{items.length}</strong>
@@ -292,18 +292,18 @@ function FinishForm({
           </div>
           <div>
             <strong>{rpe * duration}</strong>
-            <span>yuklama, AU</span>
+            <span>yuklama (AU)</span>
           </div>
         </div>
 
         <label className="field">
-          <span>Davomiylik (isinish bilan), daqiqa</span>
+          <span>Davomiylik (badan qizdirish bilan), daqiqa</span>
           <input type="number" inputMode="numeric" min={5} max={180} value={duration} onChange={(e) => setDuration(Math.max(1, Number(e.target.value) || 1))} />
         </label>
 
         <div className="field">
           <span>
-            Og‘irlik hissi (RPE): <b>{rpe}</b> — {RPE_LABEL[rpe]}
+            Sezilgan zo‘riqish darajasi (RPE): <b>{rpe}</b> — {RPE_LABEL[rpe]}
           </span>
           <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="rpe" style={{ '--pct': `${((rpe - 1) / 9) * 100}%` } as React.CSSProperties} />
         </div>
@@ -321,7 +321,7 @@ function FinishForm({
 
         <label className="field">
           <span>Izoh (ixtiyoriy)</span>
-          <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Masalan: chap tizzada noqulaylik" />
+          <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Masalan: chap tizzamda noqulaylik sezdim" />
         </label>
       </div>
       <div className="runner__actions">
