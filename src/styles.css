@@ -171,3 +171,5 @@
 .bottom-nav{padding-bottom:max(10px,var(--sab))}
 .modal{max-height:calc(100dvh - 48px - var(--sat) - var(--sab))}
 body::before{content:"";position:fixed;inset:0 0 auto;height:var(--sat);background:#fffefa;z-index:60;pointer-events:none}
+.real-clip{display:flex;align-items:center;gap:13px;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:15px;background:#f6f7f0}.real-clip>video{width:96px;height:96px;flex-shrink:0;border-radius:11px;object-fit:cover;background:#e6eadc}.real-clip>div{display:grid;gap:4px;min-width:0}.real-clip strong{font-size:12px;font-weight:800;color:#6f8562}.real-clip small{font-size:10px;line-height:1.6;color:#6d7963}.real-clip a{font-size:9px;color:#8f9a82;text-decoration:underline;justify-self:start}
+@media(max-width:540px){.real-clip{gap:11px;padding:8px}.real-clip>video{width:84px;height:84px}.real-clip strong{font-size:11px}.real-clip small{font-size:9px}}

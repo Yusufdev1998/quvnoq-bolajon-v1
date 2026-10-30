@@ -16,6 +16,7 @@ import { animationIsRunning } from './animationPlayback';
 import { useReducedMotion } from './useReducedMotion';
 import { GardenScenery, SceneProgress, StarChallenge } from './GardenAdventure';
 import { CommandCard } from './CommandCard';
+import { RealClip } from './RealClip';
 import { advanceSceneClock, canAdvanceStory } from './adventure';
 
 const Bunny3D = lazy(() => import('./Bunny3D'));
@@ -357,6 +358,7 @@ function ActivityPlayer({ activity, close, save, reducedMotion }: { activity: Ac
         <span className="scene-flower">✿</span>{paused && <div className="pause-overlay"><Pause size={32} /><strong>Tanaffus</strong></div>}
         <CommandCard key={`${stage}-${replay}`} step={step} paused={paused} />
       </div>
+      <RealClip key={stage} step={step} paused={paused || exit || !visible} reducedMotion={motionReduced} />
       <SceneProgress elapsed={sceneSeconds} duration={duration} story={story} auto={autoAdvance} toggleAuto={() => setAutoAdvance(a => !a)} challenge={!!step.challenge} collected={found.length} reduced={motionReduced} />
       <h2>{step.title}</h2><p className="step-instruction" aria-live="polite">{step.instruction}</p>
       <div className="player-adult-note"><Users size={15} />{story ? 'Birga tomosha qiling va o‘z sur’atingizda takrorlang.' : 'Harakat bajarilgach, katta kishi tasdiqlaydi.'}</div>

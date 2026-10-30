@@ -5,7 +5,7 @@ export type Mood = 'happy' | 'okay' | 'tired';
 // static stretch that ends a session; the last six are seated fine-motor hand moves.
 export type Pose = 'still' | 'reach' | 'wings' | 'wave' | 'step' | 'march' | 'run' | 'jump' | 'balance' | 'cooldown' | 'dance' | 'celebrate'
   | 'hands' | 'ball' | 'fingers' | 'ring' | 'pinch' | 'roll';
-export type Step = { title: string; instruction: string; pose: Pose; cue: string; seconds?: number; challenge?: boolean };
+export type Step = { title: string; instruction: string; pose: Pose; cue: string; seconds?: number; challenge?: boolean; clip?: string };
 export type Activity = {
   id: string; kind: ActivityKind; title: string; description: string; duration: string;
   art: 'bunny' | 'ball' | 'hands' | 'train' | 'flower' | 'bear'; color: string;
@@ -119,7 +119,7 @@ export const motorActivities: Activity[] = motorItems.map(([id, title, descripti
   color: ['lavender', 'peach', 'mint', 'butter'][i % 4], group: i < 2 ? 'Jihozsiz' : 'Jihozlar bilan',
   steps: [
     { title: 'Tayyorlanamiz', instruction: `Qulay o‘tiring. Kerak bo‘ladi: ${equipment.toLowerCase()}. Katta kishi mashqni avval ko‘rsatsin.`, pose: 'still', cue: 'Kuzat' },
-    { title, instruction, pose: motorPoses[id], cue: 'Sekin takrorla' },
+    { title, instruction, pose: motorPoses[id], cue: 'Sekin takrorla', clip: `motor-${id}` },
     { title: 'Barmoqlar dam oladi', instruction: 'Qo‘llaringizni erkin qo‘ying. Barmoqlaringizni bo‘shashtiring va bir-biringizga qo‘l silkiting.', pose: 'wave', cue: 'Dam ol' },
   ],
 }));
