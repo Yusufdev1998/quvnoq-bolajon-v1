@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Flyball</string>
+    <string name="title_activity_main">Flyball</string>
+    <string name="package_name">uz.flyball.app</string>
+    <string name="custom_url_scheme">uz.flyball.app</string>
+</resources>
