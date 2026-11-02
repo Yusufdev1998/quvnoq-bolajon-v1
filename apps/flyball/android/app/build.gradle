@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 
+// Name the APK flyball-debug.apk / flyball-release.apk so it isn't confused with Quvnoq bolajon's app-debug.apk.
+base {
+    archivesName = "flyball"
+}
+
 android {
     namespace = "uz.flyball.app"
     compileSdk = rootProject.ext.compileSdkVersion
